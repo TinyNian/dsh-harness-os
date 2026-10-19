@@ -240,6 +240,26 @@ window.__ModuleLoader__.load({
       CV + ' ' + C('heroWorkspaceRow') + ' :is(' + C('workspace') + ',' + C('seat') + '):hover,' + CV + ' [data-slot="conversation.input.permission"] ' + C('trigger') + ':hover{border-color:var(--hos-hair)!important;color:var(--hos-ink)}',
       /* 输入卡：切角 + 磨砂 */
       CV + ' [data-composer-card=true]{border:1px solid var(--hos-hair)!important;background:linear-gradient(180deg,var(--hos-glass-hi),transparent 48%),var(--hos-glass)!important;-webkit-backdrop-filter:blur(15px) saturate(1.18);backdrop-filter:blur(15px) saturate(1.18);box-shadow:none!important;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}',
+      /* 切角补一道发丝斜线（clip-path 切掉的角不会自己画边） */
+      CV + ' [data-composer-card=true]{background:linear-gradient(to top right,transparent calc(50% - 1px),var(--hos-hair) calc(50% - 1px),var(--hos-hair) calc(50% + .5px),transparent calc(50% + .5px)) top right/16px 16px no-repeat,linear-gradient(to top right,transparent calc(50% - 1px),var(--hos-hair) calc(50% - 1px),var(--hos-hair) calc(50% + .5px),transparent calc(50% + .5px)) bottom left/16px 16px no-repeat,linear-gradient(180deg,var(--hos-glass-hi),transparent 48%),var(--hos-glass)!important;border-color:color-mix(in srgb,var(--hos-ink) 20%,transparent)!important}',
+      CV + ' [data-composer-card=true] [data-composer-input]{min-height:44px}',
+      /* 加号、冻结追加等次要按钮：和胶囊同一套 */
+      CV + ' [data-composer-card=true] ' + C('add') + '{background:transparent!important;border:1px solid transparent!important;box-shadow:none!important;color:var(--hos-ink-soft)}',
+      CV + ' [data-composer-card=true] ' + C('add') + ':hover{background:var(--hos-hair-soft)!important}',
+      CV + ' [data-slot="conversation.input.right"] button{border:1px solid var(--hos-hair-soft)!important;background:var(--hos-hair-soft)!important;box-shadow:none!important;color:var(--hos-ink-soft);font-size:12px}',
+      CV + ' [data-slot="conversation.input.right"] button:hover{border-color:var(--hos-hair)!important;color:var(--hos-ink)}',
+      CV + ' [data-slot="conversation.input.model"] ' + C('trigger') + '{background:transparent!important;border:0!important;box-shadow:none!important}',
+      CV + ' [data-slot="conversation.input.model"] ' + C('trigger') + ':hover{background:var(--hos-hair-soft)!important}',
+      CV + ' [data-slot="conversation.input.model"] ' + C('triggerEffort') + '{font-family:var(--hos-mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--hos-accent-ink)!important}',
+      /* 输入框下方的轮次 / 速度 / 用量：等宽读数 */
+      CV + ' [data-composer-dock=true]{font-family:var(--hos-mono);font-size:10px;letter-spacing:.12em;color:var(--hos-muted)}',
+      CV + ' [data-composer-dock=true] *{font-family:inherit!important;font-size:inherit!important;letter-spacing:inherit}',
+      /* 待办 / 目标 / 队列：贴在输入框上方的切角卡 */
+      CV + ' [data-slot="conversation.input.dock"] :is([data-testid=todo-panel],[data-goal-bar],[data-queue-dock]){border:1px solid var(--hos-hair)!important;border-bottom:0!important;background:linear-gradient(180deg,var(--hos-glass-hi),transparent 70%),var(--hos-glass)!important;box-shadow:none!important;-webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}',
+      /* 输入框座位的淡出渐变：原生在暗色下渐变到写死的中性灰，改成渐变到底板色 */
+      CV + ' ' + C('composerSeat') + '{background:linear-gradient(color-mix(in srgb,var(--hos-bg) 0%,transparent) 0,color-mix(in srgb,var(--hos-bg) 82%,transparent) 36px)!important}',
+      /* 信号轨迹只属于空会话页 */
+      CV + ' > [data-phase=active] .hos-trace{display:none}',
       CV + ' [data-composer-card=true]:focus-within{border-color:color-mix(in srgb,var(--hos-ink) 45%,transparent)!important}',
       CV + ' [data-composer-card=true] ' + C('primary') + '{background:var(--hos-ink)!important;color:var(--hos-box-ink)!important;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);transition:background-color 200ms}',
       CV + ' [data-composer-card=true] ' + C('primary') + ':not(:disabled):hover{background:var(--hos-accent)!important;color:#fff!important}',
@@ -271,6 +291,42 @@ window.__ModuleLoader__.load({
       CV + ' :is(pre,[class*="codeBlock"]){border:1px solid var(--hos-hair)}',
       /* 改动文件卡片 / 交付卡片：同一套切角 */
       CV + ' :is([class*="_changes"],[class*="deliver"],[class*="Deliver"]) :is(button,a){border-radius:0}'
+    ]
+
+    /* ── 5b. 轨迹页：表格 + 时间轴，换成档案的读法 ─────────────────── */
+    var TRAJ = [
+      CV + ' ' + C('tablePane') + ',' + CV + ' ' + C('table') + '{background:transparent!important;--trajectory-turn-accent:var(--hos-hair)}',
+      CV + ' ' + C('table') + ' th{background:color-mix(in srgb,var(--hos-bg-2) 92%,transparent)!important;font-family:var(--hos-mono)!important;font-size:9.5px!important;letter-spacing:.22em;font-weight:400!important;color:var(--hos-muted)!important;border-bottom:1px solid var(--hos-hair)!important}',
+      CV + ' ' + C('table') + ' td{border-bottom:1px solid var(--hos-hair-soft)!important}',
+      CV + ' ' + C('table') + ' tbody tr[data-selected=true]{background:color-mix(in srgb,var(--hos-ink) 8%,transparent)!important}',
+      CV + ' ' + C('table') + ' tbody tr[data-turn-start=true]:not(:first-child) td::before{background:var(--hos-hair)!important;height:1px!important}',
+      CV + ' ' + C('turnRail') + '{background:var(--hos-hair-soft)!important}',
+      CV + ' ' + C('selectionRail') + '{background:var(--hos-accent)!important}',
+      /* 角色标签：去掉彩色底，改成描边等宽小字 */
+      CV + ' ' + C('kindTag') + '{background:transparent!important;border:1px solid currentColor!important;font-family:var(--hos-mono);font-size:10px;letter-spacing:.14em;height:18px}',
+      CV + ' ' + C('kindTag') + C('user') + '{color:var(--hos-ink)!important;background:var(--hos-hair-soft)!important}',
+      CV + ' ' + C('kindTag') + C('assistantVioletBright') + '{color:var(--hos-accent-2)!important}',
+      CV + ' ' + C('kindTag') + C('toolAmber') + '{color:var(--hos-accent-ink)!important}',
+      CV + ' ' + C('kindTag') + C('subtoolAmber') + '{color:color-mix(in srgb,var(--hos-accent-ink) 65%,var(--hos-muted))!important}',
+      CV + ' ' + C('kindTag') + C('contextGreen') + '{color:color-mix(in srgb,var(--hos-accent-2) 55%,var(--hos-muted))!important}',
+      CV + ' ' + C('kindTag') + C('systemNeutral') + '{color:var(--hos-muted)!important}',
+      /* 时间轴：直角色块，同一套配色 */
+      CV + ' ' + C('span') + '[data-timeline-span]{border-radius:0!important;height:6px!important;margin-top:1px}',
+      CV + ' ' + C('span') + '[data-timeline-span=message]{--trajectory-assistant-decoding-color:var(--hos-accent-2)!important;--trajectory-assistant-ttft-color:color-mix(in srgb,var(--hos-accent-2) 40%,transparent)!important}',
+      CV + ' ' + C('span') + '[data-timeline-span=tool],' + CV + ' ' + C('span') + '[data-timeline-span=subtool]{background:var(--hos-accent)!important}',
+      CV + ' ' + C('span') + '[data-timeline-span=user]{background:var(--hos-ink)!important}',
+      CV + ' ' + C('span') + '[data-timeline-span=context]{background:color-mix(in srgb,var(--hos-accent-2) 45%,var(--hos-muted))!important}',
+      CV + ' ' + C('span') + '[data-current=true]{box-shadow:0 0 0 1px var(--hos-bg),0 0 0 2px var(--hos-ink)!important}',
+      CV + ' ' + C('labels') + '{font-family:var(--hos-mono)!important;letter-spacing:.14em;color:var(--hos-muted)!important;border-right:1px solid var(--hos-hair)!important}',
+      CV + ' ' + C('turnBoundary') + '{background:var(--hos-hair)!important}',
+      /* 工具栏：时长 / 轮次 / 调用切换与搜索 */
+      CV + ' ' + C('toggle') + '{font-family:var(--hos-mono);font-size:10.5px;letter-spacing:.12em}',
+      CV + ' ' + C('search') + '{background:transparent!important;border:0!important;border-bottom:1px solid var(--hos-hair)!important;box-shadow:none!important}',
+      /* 详情面板 */
+      CV + ' ' + C('details') + '{background:linear-gradient(180deg,color-mix(in srgb,var(--hos-glass) 70%,transparent),color-mix(in srgb,var(--hos-glass) 30%,transparent))!important;border-left:1px solid var(--hos-hair)!important}',
+      CV + ' ' + C('detailsTitle') + '{font-weight:600;letter-spacing:.04em}',
+      CV + ' ' + C('detailTabActive') + '{background:var(--hos-box-bg)!important;color:var(--hos-box-ink)!important}',
+      CV + ' :is(' + C('jsonPayload') + ',' + C('programSource') + ',' + C('programOutput') + ',' + C('sourceBlock') + '){border:1px solid var(--hos-hair)!important;font-family:var(--hos-mono)}'
     ]
 
     /* ── 6. 右侧栏（停靠列） ─────────────────────────────────────────── */
@@ -364,7 +420,7 @@ window.__ModuleLoader__.load({
     function cssText() {
       var a = ACCENTS[S.accent] || ACCENTS.orange
       var acc = B + '{--hos-accent:' + a[0] + ';--hos-accent-ink:' + a[1] + '}' + D + '{--hos-accent-ink:' + a[2] + '}'
-      return [].concat(TOKENS, [acc], BASE, SIDEBAR, HERO, FLOW, DOCK, POP, MOTION).join('\n')
+      return [].concat(TOKENS, [acc], BASE, SIDEBAR, HERO, FLOW, TRAJ, DOCK, POP, MOTION).join('\n')
     }
     var styleTag = null
     function injectCss() {
