@@ -73,8 +73,8 @@ dsh plugin --profile desktop remove dsh-startup-screen
 
 ## 兼容性与已知限制
 
-- 在 **DSH 0.2.1-rc.2 web profile**（macOS，Chrome）上实测过：揭幕衔接、侧栏、空会话页、对话流、右侧栏、菜单、设置页。
-- **桌面端（Electron）还没有实机验证**。皮肤只用浏览器端能力，理论上一致；macOS 红绿灯、Windows 标题栏按钮区域和机框的配合需要实机确认。
+- 在 **DSH 0.2.1-rc.2** 上实测过：web profile（macOS，Chrome）与 **macOS 桌面端**（已实装日常使用）。揭幕衔接、侧栏与折叠动画、空会话页、对话流、右侧栏、菜单、设置页都对上。
+- macOS 桌面端为红绿灯和顶栏按钮在机框上留了缺口，并用皮肤底板替代原生毛玻璃窗口背景。**Windows 桌面端**还没有实机验证，标题栏按钮区域和机框的配合可能需要调整。
 - 皮肤靠 DSH 的 `data-slot` 和 CSS Modules 语义类名（如 `_newSession`）定位元素。DSH 改了结构时，对应部分会退回原生样式，不会让界面坏掉。
 - 和其他整套皮肤（比如深海女仆工坊）不要同时启用。
 
