@@ -75,7 +75,10 @@ window.__ModuleLoader__.load({
 
     /* ── 1. 主题变量 ───────────────────────────────────────────────────── */
     var TOKENS = [
-      B + '{',
+      /* 同时挂在暗色选择器上：DSH 暗色主题在 body[data-ds-dark-theme] 上重设了同一批 --dsw-alias-*，
+         和 body[data-hos] 同优先级、又排在后面，只挂 B 时暗色下全被原生色盖掉（提示框灰、徽标蓝、状态绿、实色底）。
+         挂上 D 后优先级更高；明暗不同的值由紧随其后的 D 块再覆盖 */
+      B + ',' + D + '{',
       '--hos-bg:#dedbd4;--hos-bg-2:#f2efe8;--hos-bg-3:#f8f6f1;--hos-ink:#0b0c0d;--hos-ink-soft:#34383a;--hos-muted:#6c6f6c;',
       '--hos-hair:rgba(20,25,28,.18);--hos-hair-soft:rgba(20,25,28,.07);--hos-hair-strong:rgba(20,25,28,.3);',
       '--hos-accent-2:#2c7a8a;--hos-red:#ff3b30;--hos-glass:rgba(255,252,246,.58);--hos-glass-hi:rgba(255,255,255,.72);',
@@ -106,7 +109,13 @@ window.__ModuleLoader__.load({
       '--dsw-alias-menu-group-header-fill:var(--hos-bg-2);--dsw-alias-menu-icon:var(--hos-ink-soft);',
       '--dsw-alias-scrollbar-bg-l1:var(--hos-hair);--dsw-alias-scrollbar-bg-l2:var(--hos-hair);--dsw-alias-scrollbar-hover-l1:var(--hos-hair-strong);--dsw-alias-scrollbar-hover-l2:var(--hos-hair-strong);',
       '--dsw-alias-settings-card-fill:var(--hos-glass);--dsw-alias-settings-card-stroke:var(--hos-hair);--dsw-alias-switch-thumb:var(--hos-bg-2);',
-      '--dsw-alias-toast-bg:var(--hos-box-bg);--dsw-alias-toast-label:var(--hos-box-ink);--dsw-alias-tooltip-bg:var(--hos-box-bg);--dsw-alias-tooltip-key-bg:color-mix(in srgb,var(--hos-box-bg),white 18%);',
+      '--dsw-alias-toast-bg:var(--hos-box-bg);--dsw-alias-toast-label:var(--hos-box-ink);',
+      /* 提示框和悬停卡的字是原生写死的白色，底色两套主题都得是深色：浅色用墨色，暗色用比底板亮一级的深青灰 */
+      '--hos-tip:var(--hos-ink);--dsw-alias-tooltip-bg:var(--hos-tip);--dsw-alias-tooltip-key-bg:color-mix(in srgb,var(--hos-tip),white 16%);',
+      /* 原生蓝强调色换成皮肤的青色；其余漏网的原生色一并接管 */
+      '--dsw-alias-brand-primary-new-colorprimary-new-color:var(--hos-accent-2);--dsw-alias-bg-document-selection:color-mix(in srgb,var(--hos-accent-2) 22%,transparent);',
+      '--dsw-alias-label-shimmer:var(--hos-muted);--dsw-alias-label-document-preview:var(--hos-ink-soft);--dsw-alias-state-idle-primary:var(--hos-muted);',
+      '--dsw-alias-button-tool-bar-fill:var(--hos-hair-soft);--dsw-alias-button-tool-bar-fill-invisible:transparent;--dsw-alias-button-tool-bar-hover:var(--hos-hair);',
       '--dsw-alias-turn-trigger-bg:transparent;--dsw-alias-turn-trigger-bg-hover:var(--hos-hair-soft);',
       '--dsw-alias-file-diff-added-bg:color-mix(in srgb,var(--hos-accent-2) 12%,transparent);--dsw-alias-file-diff-added-gutter:color-mix(in srgb,var(--hos-accent-2) 8%,transparent);--dsw-alias-file-diff-added-marker:var(--hos-accent-2);',
       '--dsw-alias-file-diff-deleted-bg:color-mix(in srgb,var(--hos-red) 11%,transparent);--dsw-alias-file-diff-deleted-gutter:color-mix(in srgb,var(--hos-red) 7%,transparent);--dsw-alias-file-diff-deleted-marker:var(--hos-red);',
@@ -122,6 +131,7 @@ window.__ModuleLoader__.load({
       '--dsw-alias-bg-mask-1:rgba(7,10,14,.6);--dsw-alias-bg-mask-2:rgba(7,10,14,.35);--dsw-alias-bg-mask-3:rgba(0,0,0,.6);--dsw-alias-bg-mask-drop:rgba(13,19,26,.72);',
       '--dsw-alias-interactive-bg-active:rgba(180,210,225,.12);--dsw-alias-interactive-bg-hover-accent:rgba(180,210,225,.14);--dsw-alias-button-ghost-active-hover:rgba(180,210,225,.12);',
       '--dsw-alias-label-caption:#5f6d77;',
+      '--hos-tip:#17222b;',
       '}'
     ]
 
@@ -186,7 +196,8 @@ window.__ModuleLoader__.load({
          收起后的稳态靠 opacity 藏住，等折叠播完再切，避免最后一帧闪一下 */
       '#hos-chrome .hos-brand{clip-path:inset(0 var(--hos-brand-clip,0px) 0 0)}',
       /* macOS 桌面端收起后侧栏列宽为 0，DSH 的窄栏（rail）只会在折叠途中从幕布边缘闪出来，直接藏掉 */
-      'html[data-platform=darwin] [data-slot=root] > [data-sidebar-collapsed=true] > ' + C('sidebarCol') + ' ' + C('collapsed') + '{visibility:hidden}',
+      /* 只在顶栏确实给出了「展开侧栏」按钮时才藏，免得窄窗口下窄栏和按钮两头都没有 */
+      'html[data-platform=darwin] body:has([data-slot="shell.leading"] button) [data-slot=root] > [data-sidebar-collapsed=true] > ' + C('sidebarCol') + ' ' + C('collapsed') + '{visibility:hidden}',
       'body:has([data-slot=root] > [data-sidebar-collapsed=true]) #hos-chrome .hos-brand{opacity:0;transition:transform 720ms ' + EASE + ',opacity 0s linear ' + FOLD_MS + 'ms}',
       'body[data-hos-phase=docked]:not(:has([data-slot=root] > [data-sidebar-collapsed=true])) #hos-chrome .hos-brand{transition:transform 720ms ' + EASE + ',opacity 0s}',
       'body:not([data-hos-chassis]) #hos-chrome .hos-brand{left:20px;top:18px}',
@@ -255,8 +266,10 @@ window.__ModuleLoader__.load({
       CV + ' > ' + C('root') + '[data-phase]{background:transparent!important}',
       CV + ' ' + C('previewBadge') + '{position:static!important;transform:none!important;align-self:center;order:3;margin-top:8px;padding:1px 6px;background:none!important;border:1px solid var(--hos-hair);font-family:var(--hos-mono);font-size:9.5px;letter-spacing:.22em;color:var(--hos-muted)!important}',
       '.hos-hero-en{position:relative;z-index:1;margin-top:6px;font-family:var(--hos-mono);font-size:11px;letter-spacing:.5em;text-indent:.5em;color:var(--hos-ink-soft);text-shadow:0 0 10px var(--hos-halo);white-space:nowrap}',
+      /* 矮窗口里准星缩小，英文副标题收字距，两端不压外圈 */
+      '@media (max-height:860px){.hos-hero-en{letter-spacing:.34em;text-indent:.34em}}',
       '.hos-hero-rule{position:relative;z-index:1;width:min(520px,80%);height:1px;margin-top:10px;background:linear-gradient(90deg,transparent,var(--hos-hair) 18%,var(--hos-hair) 82%,transparent)}',
-      '.hos-reticle{position:absolute;left:50%;top:50%;width:min(400px,46vh);aspect-ratio:1;transform:translate(-50%,-50%);color:var(--hos-ink);pointer-events:none;z-index:0}',
+      '.hos-reticle{position:absolute;left:50%;top:50%;width:clamp(340px,46vh,400px);aspect-ratio:1;transform:translate(-50%,-50%);color:var(--hos-ink);pointer-events:none;z-index:0}',
       '.hos-reticle.docking{transition:transform 1150ms cubic-bezier(.22,.8,.2,1),opacity 900ms ease}',
       '.hos-reticle svg{width:100%;height:100%;overflow:visible}',
       '.hos-r-a{fill:none;stroke:currentColor;stroke-width:1.6;opacity:.62}.hos-r-b{fill:none;stroke:currentColor;stroke-width:1;opacity:.3}',
@@ -309,6 +322,9 @@ window.__ModuleLoader__.load({
       CV + ' [data-conversation-tabs] ' + C('tabActive') + '{background:var(--hos-box-bg)!important;color:var(--hos-box-ink)!important}',
       /* 原生选中标签底下的强调色指示条和反色块重复，暗色下还露出一截蓝 */
       CV + ' [data-conversation-tabs] ' + C('tab') + '::after{display:none}',
+      /* 提问卡：原生底色写死（浅色纯白、暗色 #2C2C2E），改成和输入卡同一套玻璃切角卡 */
+      CV + ' [data-question-key] ' + C('card') + '{--hos-cl:color-mix(in srgb,var(--hos-ink) 20%,transparent);border:1px solid var(--hos-cl);background:' + cutTR(16) + ',var(--hos-glass)!important;-webkit-backdrop-filter:blur(15px) saturate(1.18);backdrop-filter:blur(15px) saturate(1.18);box-shadow:none!important;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%)}',
+      CV + ' [data-question-key] ' + C('badge') + '{background:transparent!important;border:1px solid var(--hos-hair);color:var(--hos-accent-ink)!important;font-family:var(--hos-mono);font-size:10px;letter-spacing:.12em}',
       CV + ' [data-chat-flow-kind=user] ' + C('bubble') + '{--hos-cl:var(--hos-hair);border:1px solid var(--hos-cl)!important;background:' + cutTR(12) + ',var(--hos-glass)!important;box-shadow:inset 0 1px 0 var(--hos-glass-hi);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}',
       CV + ' :is(' + C('timeStart') + ',' + C('timeEnd') + ',' + C('endInfo') + '){font-family:var(--hos-mono);font-size:10px;letter-spacing:.14em}',
       CV + ' [data-turn-process]{font-family:var(--hos-mono);font-size:10.5px;letter-spacing:.14em;color:var(--hos-muted)}',
@@ -329,6 +345,8 @@ window.__ModuleLoader__.load({
 
     /* ── 5b. 轨迹页：表格 + 时间轴，换成档案的读法 ─────────────────── */
     var TRAJ = [
+      /* 轨迹页根节点和分栏用 bg-layer-1 铺满，盖住底板成一整块实色 */
+      CV + ' ' + C('split') + ',' + CV + ' :has(> ' + C('split') + '){background:transparent!important}',
       CV + ' ' + C('tablePane') + ',' + CV + ' ' + C('table') + '{background:transparent!important;--trajectory-turn-accent:var(--hos-hair)}',
       CV + ' ' + C('table') + ' th{background:color-mix(in srgb,var(--hos-bg-2) 92%,transparent)!important;font-family:var(--hos-mono)!important;font-size:9.5px!important;letter-spacing:.22em;font-weight:400!important;color:var(--hos-muted)!important;border-bottom:1px solid var(--hos-hair)!important}',
       CV + ' ' + C('table') + ' td{border-bottom:1px solid var(--hos-hair-soft)!important}',
@@ -373,6 +391,8 @@ window.__ModuleLoader__.load({
     /* ── 6. 右侧栏（停靠列） ─────────────────────────────────────────── */
     var RB = B + ' [data-slot=rightbar]'
     var DOCK = [
+      /* 终端屏幕：原生用 bg-base 实色铺底，浅色下是一整块灰；透明后落在面板玻璃上 */
+      RB + ' ' + C('screen') + ',' + RB + ' :is(.xterm-viewport,.xterm-scrollable-element){background:transparent!important}',
       /* 面板左边线由皮肤画，停靠区第一列自带的左边线会和它并成一条粗线 */
       RB + ' ' + C('tabHost') + '[data-dockkit-column="0"]{border-left:0}',
       /* dockkit 的停靠标签页宿主用 bg-base 实色铺底，会盖住面板玻璃（桌面端底板生效后尤其显眼）；浮动窗保留自己的层级底色 */
@@ -397,6 +417,8 @@ window.__ModuleLoader__.load({
     /* ── 7. 浮层：菜单、提示、设置页 ─────────────────────────────────── */
     var POP = [
       B + ' [data-radix-popper-content-wrapper]{filter:drop-shadow(0 18px 40px rgba(20,16,10,.16))}',
+      /* 会话悬停卡：原生在组件上写死 --dsw-hovercard-bg: #2C2C2E，换成和提示框同一块深色切角卡 */
+      B + ' > ' + C('card') + '{--dsw-hovercard-bg:var(--hos-tip);--hos-cl:color-mix(in srgb,white 14%,transparent);border:1px solid var(--hos-cl);background:' + cutTR(10) + ',var(--hos-tip)!important;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}',
       D + ' [data-radix-popper-content-wrapper]{filter:drop-shadow(0 22px 48px rgba(0,0,0,.5))}',
       /* mac 桌面端 DSH 在菜单下面垫了一层不跟着切角走的实色底（_backing），切角处会露出一块 */
       B + ' ' + C('backing') + '{display:none}',
@@ -430,6 +452,8 @@ window.__ModuleLoader__.load({
       B + ' [data-shortcut-modal=settings] ' + C('setting') + ' > ' + C('button') + ',' + B + ' [data-shortcut-modal=settings] ' + C('stepper') + '{border:1px solid var(--hos-hair)!important;background:transparent!important}',
       B + ' [data-shortcut-modal=settings] ' + C('setting') + ' > ' + C('button') + '{padding:5px 12px}',
       B + ' [data-shortcut-modal=settings] ' + C('setting') + ' > ' + C('button') + ':hover{background:var(--hos-hair-soft)!important}',
+      /* 设置页里的原生滑块 / 复选框（开机动画那一节）不用浏览器默认蓝 */
+      B + ' [data-shortcut-modal=settings] input:is([type=range],[type=checkbox],[type=radio]){accent-color:var(--hos-ink)}',
       B + ' [data-shortcut-modal=settings] ' + C('themeCube') + '{border:1px solid var(--hos-hair)!important}',
       B + ' [data-shortcut-modal=settings] ' + C('themeCube') + C('selected') + '{border-color:var(--hos-ink)!important}',
       /* 开关：方槽方钮，开启时槽填墨、钮点强调色 */
