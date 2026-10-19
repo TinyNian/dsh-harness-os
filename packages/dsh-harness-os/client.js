@@ -126,6 +126,11 @@ window.__ModuleLoader__.load({
     ]
 
     /* ── 2. 底板、机框、全局形状 ─────────────────────────────────────────── */
+    /* 切角发丝斜线：clip-path 切掉的角不会自己画边。用原点在 border-box 的渐变补一道 1px 斜线，
+       整条落在保留一侧（压在裁切线上会被切掉一半），颜色跟边框共用 --hos-cl，两端才和直边接得上；
+       斜线抗锯齿后看着比直边淡，宽度给 1.2px 补回来 */
+    function cutTR(px) { return 'linear-gradient(to top right,transparent calc(50% - 1.2px),var(--hos-cl) calc(50% - 1.2px),var(--hos-cl) 50%,transparent 50%) top right/' + px + 'px ' + px + 'px no-repeat border-box' }
+    function cutBL(px) { return 'linear-gradient(to top right,transparent 50%,var(--hos-cl) 50%,var(--hos-cl) calc(50% + 1.2px),transparent calc(50% + 1.2px)) bottom left/' + px + 'px ' + px + 'px no-repeat border-box' }
     var NOT_ROUND = ':not(#dsh-startup-root,#dsh-startup-root *,svg *,[role=progressbar],[class*="pinner"],[class*="avatar"],[class*="Avatar"])'
     var BASE = [
       'html:has(body[data-hos]){background:var(--hos-bg,#dedbd4)}',
@@ -142,10 +147,12 @@ window.__ModuleLoader__.load({
       /* 右侧栏拖动柄：DSH 按「整框宽 − 右栏宽」定位，没算机框左右两侧的内边距，柄比分界线偏右 2 × inset */
       B + '[data-hos-chassis] [data-slot=root]>' + C('frame') + '>' + C('handle') + '[data-side=rightbar]{translate:calc(-2 * var(--hos-inset)) 0}',
       B + ' ' + C('sidebarCol') + ',' + B + ' ' + C('centerCol') + ',' + B + ' ' + C('rightbarCol') + '{background:transparent}',
+      /* mac 桌面端 DSH 还给主区画了一道 .5px 左边线，和侧栏右边线贴在一起显粗，只留侧栏这一条 */
+      B + ' ' + C('centerCol') + '{border-left:0}',
       B + ' ' + C('sidebarCol') + '{border-right:1px solid var(--hos-hair);background:linear-gradient(180deg,color-mix(in srgb,var(--hos-glass) 70%,transparent),color-mix(in srgb,var(--hos-glass) 30%,transparent))}',
       B + ' [data-slot=sidebar],' + B + ' [data-slot=sidebar] ' + C('root') + '{background:transparent}',
-      /* 覆盖层 */
-      '#hos-chrome{position:fixed;inset:0;z-index:3;pointer-events:none;color:var(--hos-ink);font-family:var(--hos-din)}',
+      /* 覆盖层：要压过输入框座位（sticky, z-index 7）的底板，否则机框底线被盖住；低于拖动柄（11）与浮层 */
+      '#hos-chrome{position:fixed;inset:0;z-index:8;pointer-events:none;color:var(--hos-ink);font-family:var(--hos-din)}',
       '#hos-chrome[hidden]{display:none}',
       '#hos-chrome .hos-line{position:absolute;inset:var(--hos-inset);border:1px solid var(--hos-hair);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 0 rgba(0,0,0,.3)}',
       'body:not([data-hos-chassis]) #hos-chrome .hos-line,body:not([data-hos-chassis]) #hos-chrome .hos-c{display:none}',
@@ -247,7 +254,7 @@ window.__ModuleLoader__.load({
       CV + ' ' + C('composerHero') + ' ' + C('titleGroup') + ' > span:first-child{font-size:clamp(30px,4.4vh,46px);font-weight:500;letter-spacing:.3em;text-indent:.3em;color:var(--hos-ink);text-shadow:0 0 14px var(--hos-halo),0 0 5px var(--hos-halo);white-space:nowrap}',
       CV + ' > ' + C('root') + '[data-phase]{background:transparent!important}',
       CV + ' ' + C('previewBadge') + '{position:static!important;transform:none!important;align-self:center;order:3;margin-top:8px;padding:1px 6px;background:none!important;border:1px solid var(--hos-hair);font-family:var(--hos-mono);font-size:9.5px;letter-spacing:.22em;color:var(--hos-muted)!important}',
-      '.hos-hero-en{position:relative;z-index:1;margin-top:6px;font-family:var(--hos-mono);font-size:11px;letter-spacing:.62em;text-indent:.62em;color:var(--hos-ink-soft);text-shadow:0 0 10px var(--hos-halo);white-space:nowrap}',
+      '.hos-hero-en{position:relative;z-index:1;margin-top:6px;font-family:var(--hos-mono);font-size:11px;letter-spacing:.5em;text-indent:.5em;color:var(--hos-ink-soft);text-shadow:0 0 10px var(--hos-halo);white-space:nowrap}',
       '.hos-hero-rule{position:relative;z-index:1;width:min(520px,80%);height:1px;margin-top:10px;background:linear-gradient(90deg,transparent,var(--hos-hair) 18%,var(--hos-hair) 82%,transparent)}',
       '.hos-reticle{position:absolute;left:50%;top:50%;width:min(400px,46vh);aspect-ratio:1;transform:translate(-50%,-50%);color:var(--hos-ink);pointer-events:none;z-index:0}',
       '.hos-reticle.docking{transition:transform 1150ms cubic-bezier(.22,.8,.2,1),opacity 900ms ease}',
@@ -263,8 +270,7 @@ window.__ModuleLoader__.load({
       CV + ' ' + C('heroWorkspaceRow') + ' :is(' + C('workspace') + ',' + C('seat') + '):hover,' + CV + ' [data-slot="conversation.input.permission"] ' + C('trigger') + ':hover{border-color:var(--hos-hair)!important;color:var(--hos-ink)}',
       /* 输入卡：切角 + 磨砂 */
       CV + ' [data-composer-card=true]{border:1px solid var(--hos-hair)!important;background:linear-gradient(180deg,var(--hos-glass-hi),transparent 48%),var(--hos-glass)!important;-webkit-backdrop-filter:blur(15px) saturate(1.18);backdrop-filter:blur(15px) saturate(1.18);box-shadow:none!important;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}',
-      /* 切角补一道发丝斜线（clip-path 切掉的角不会自己画边） */
-      CV + ' [data-composer-card=true]{background:linear-gradient(to top right,transparent calc(50% - 1px),var(--hos-hair) calc(50% - 1px),var(--hos-hair) calc(50% + .5px),transparent calc(50% + .5px)) top right/16px 16px no-repeat,linear-gradient(to top right,transparent calc(50% - 1px),var(--hos-hair) calc(50% - 1px),var(--hos-hair) calc(50% + .5px),transparent calc(50% + .5px)) bottom left/16px 16px no-repeat,var(--hos-glass)!important;border-color:color-mix(in srgb,var(--hos-ink) 20%,transparent)!important}',
+      CV + ' [data-composer-card=true]{--hos-cl:color-mix(in srgb,var(--hos-ink) 20%,transparent);background:' + cutTR(16) + ',' + cutBL(16) + ',var(--hos-glass)!important;border-color:var(--hos-cl)!important}',
       CV + ' [data-composer-card=true] [data-composer-input]{min-height:44px}',
       /* 加号：去掉原生的底块（input.right 槽留给第三方插件，不动） */
       CV + ' [data-composer-card=true] ' + C('add') + '{background:transparent!important;border:1px solid transparent!important;box-shadow:none!important;color:var(--hos-ink-soft)}',
@@ -276,14 +282,14 @@ window.__ModuleLoader__.load({
       CV + ' [data-composer-dock=true]{font-family:var(--hos-mono);font-size:10px;letter-spacing:.12em;color:var(--hos-muted)}',
       CV + ' [data-composer-dock=true] *{font-family:inherit!important;font-size:inherit!important;letter-spacing:inherit}',
       /* 待办 / 目标 / 队列：贴在输入框上方的切角卡 */
-      CV + ' [data-slot="conversation.input.dock"] :is([data-testid=todo-panel],[data-goal-bar],[data-queue-dock]){border:1px solid var(--hos-hair)!important;border-bottom:0!important;background:linear-gradient(180deg,var(--hos-glass-hi),transparent 70%),var(--hos-glass)!important;box-shadow:none!important;-webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}',
+      CV + ' [data-slot="conversation.input.dock"] :is([data-testid=todo-panel],[data-goal-bar],[data-queue-dock]){--hos-cl:var(--hos-hair);border:1px solid var(--hos-cl)!important;border-bottom:0!important;background:' + cutTR(10) + ',linear-gradient(180deg,var(--hos-glass-hi),transparent 70%),var(--hos-glass)!important;box-shadow:none!important;-webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}',
       /* 输入框座位的淡出渐变：原生在暗色下渐变到写死的中性灰，改成渐变到底板色 */
       CV + ' ' + C('composerSeat') + '{background:none!important;isolation:isolate}',
       CV + ' [data-content-phase=active] ' + C('composerSeat') + '::before{content:"";position:absolute;left:0;right:0;top:-24px;bottom:0;z-index:-1;pointer-events:none;background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:scroll;background-position:var(--hos-seat-x,0) var(--hos-seat-y,0);background-blend-mode:overlay,normal,normal;-webkit-mask-image:linear-gradient(transparent,#000 30px);mask-image:linear-gradient(transparent,#000 30px)}',
       D + ' [data-slot="main.conversation"] [data-content-phase=active] ' + C('composerSeat') + '::before{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:scroll;background-position:var(--hos-seat-x,0) var(--hos-seat-y,0)}',
       /* 信号轨迹只属于空会话页 */
       CV + ' > [data-phase=active] .hos-trace{display:none}',
-      CV + ' [data-composer-card=true]:focus-within{border-color:color-mix(in srgb,var(--hos-ink) 45%,transparent)!important}',
+      CV + ' [data-composer-card=true]:focus-within{--hos-cl:color-mix(in srgb,var(--hos-ink) 45%,transparent)}',
       CV + ' [data-composer-card=true] ' + C('primary') + '{background:var(--hos-ink)!important;color:var(--hos-box-ink)!important;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);transition:background-color 200ms}',
       CV + ' [data-composer-card=true] ' + C('primary') + ':not(:disabled):hover{background:var(--hos-accent)!important;color:#fff!important}',
       CV + ' [data-slot="conversation.input.model"] ' + C('triggerLabel') + '{font-family:var(--hos-din);letter-spacing:.04em}',
@@ -301,7 +307,9 @@ window.__ModuleLoader__.load({
       CV + ' [data-slot="conversation.header"] ' + C('crumbCurrent') + '{font-weight:600;letter-spacing:.04em}',
       CV + ' [data-conversation-tabs] ' + C('tab') + '{font-size:12.5px;padding:3px 10px;border:1px solid transparent}',
       CV + ' [data-conversation-tabs] ' + C('tabActive') + '{background:var(--hos-box-bg)!important;color:var(--hos-box-ink)!important}',
-      CV + ' [data-chat-flow-kind=user] ' + C('bubble') + '{border:1px solid var(--hos-hair)!important;background:var(--hos-glass)!important;box-shadow:inset 0 1px 0 var(--hos-glass-hi);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}',
+      /* 原生选中标签底下的强调色指示条和反色块重复，暗色下还露出一截蓝 */
+      CV + ' [data-conversation-tabs] ' + C('tab') + '::after{display:none}',
+      CV + ' [data-chat-flow-kind=user] ' + C('bubble') + '{--hos-cl:var(--hos-hair);border:1px solid var(--hos-cl)!important;background:' + cutTR(12) + ',var(--hos-glass)!important;box-shadow:inset 0 1px 0 var(--hos-glass-hi);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}',
       CV + ' :is(' + C('timeStart') + ',' + C('timeEnd') + ',' + C('endInfo') + '){font-family:var(--hos-mono);font-size:10px;letter-spacing:.14em}',
       CV + ' [data-turn-process]{font-family:var(--hos-mono);font-size:10.5px;letter-spacing:.14em;color:var(--hos-muted)}',
       /* 思考 / 工具调用行：标题改成等宽小字，像启动页的状态行 */
@@ -312,6 +320,9 @@ window.__ModuleLoader__.load({
       CV + ' [data-chat-flow-kind=tool-call] [data-disclosure-row]:hover{background:var(--hos-hair-soft)}',
       CV + ' pre,' + CV + ' code{font-family:var(--hos-mono)}',
       CV + ' :is(pre,[class*="codeBlock"]){border:1px solid var(--hos-hair)}',
+      /* 代码卡片：外框包住语言栏和代码区，代码区只留和语言栏之间的分隔线 */
+      CV + ' .md-code-block{border:1px solid var(--hos-hair)}',
+      CV + ' .md-code-block pre{border:0;border-top:1px solid var(--hos-hair-soft)}',
       /* 改动文件卡片 / 交付卡片：同一套切角 */
       CV + ' :is([class*="_changes"],[class*="deliver"],[class*="Deliver"]) :is(button,a){border-radius:0}'
     ]
@@ -362,6 +373,8 @@ window.__ModuleLoader__.load({
     /* ── 6. 右侧栏（停靠列） ─────────────────────────────────────────── */
     var RB = B + ' [data-slot=rightbar]'
     var DOCK = [
+      /* 面板左边线由皮肤画，停靠区第一列自带的左边线会和它并成一条粗线 */
+      RB + ' ' + C('tabHost') + '[data-dockkit-column="0"]{border-left:0}',
       /* dockkit 的停靠标签页宿主用 bg-base 实色铺底，会盖住面板玻璃（桌面端底板生效后尤其显眼）；浮动窗保留自己的层级底色 */
       B + ' ' + C('tabHost') + ':not(' + C('float') + '),' + B + ' ' + C('emptyTabHost') + '{background:transparent}',
       RB + ' ' + C('panel') + '[data-sidebar-right-open=true]{border-left:1px solid var(--hos-hair);background:linear-gradient(180deg,color-mix(in srgb,var(--hos-glass) 55%,transparent),color-mix(in srgb,var(--hos-glass) 22%,transparent))!important;box-shadow:none!important}',
@@ -373,9 +386,9 @@ window.__ModuleLoader__.load({
       RB + ' [data-sidebar-right-guide] ' + C('hero') + ' > svg:not(.hos-guide-ret){display:none}',
       RB + ' [data-sidebar-right-guide] ' + C('hero') + '{width:132px;height:132px;opacity:.55;color:var(--hos-ink)}',
       RB + ' [data-sidebar-right-guide] ' + C('hero') + ' .hos-guide-ret{width:100%;height:100%}',
-      RB + ' [data-sidebar-right-guide-entry]{position:relative;overflow:hidden;border:1px solid var(--hos-hair)!important;background:color-mix(in srgb,var(--hos-glass) 70%,transparent)!important;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);transition:color 220ms ease,border-color 220ms}',
+      RB + ' [data-sidebar-right-guide-entry]{--hos-cl:var(--hos-hair);position:relative;overflow:hidden;border:1px solid var(--hos-cl)!important;background:' + cutTR(10) + ',color-mix(in srgb,var(--hos-glass) 70%,transparent)!important;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);transition:color 220ms ease,border-color 220ms}',
       RB + ' button[data-sidebar-right-guide-entry]::before{content:"";position:absolute;inset:0;background:var(--hos-ink);transform:translateX(-101%);transition:transform 300ms cubic-bezier(.2,.9,.2,1);z-index:0}',
-      RB + ' button[data-sidebar-right-guide-entry]:is(:hover,:focus-visible){color:var(--hos-box-ink);border-color:var(--hos-ink)!important}',
+      RB + ' button[data-sidebar-right-guide-entry]:is(:hover,:focus-visible){--hos-cl:var(--hos-ink);color:var(--hos-box-ink)}',
       RB + ' button[data-sidebar-right-guide-entry]:is(:hover,:focus-visible)::before{transform:none}',
       RB + ' button[data-sidebar-right-guide-entry]:is(:hover,:focus-visible) *{color:inherit!important}',
       RB + ' button[data-sidebar-right-guide-entry] > *{position:relative;z-index:1}'
@@ -385,7 +398,11 @@ window.__ModuleLoader__.load({
     var POP = [
       B + ' [data-radix-popper-content-wrapper]{filter:drop-shadow(0 18px 40px rgba(20,16,10,.16))}',
       D + ' [data-radix-popper-content-wrapper]{filter:drop-shadow(0 22px 48px rgba(0,0,0,.5))}',
-      B + ' [data-menu-material]{border:1px solid var(--hos-hair)!important;box-shadow:none!important;clip-path:polygon(0 0,calc(100% - 11px) 0,100% 11px,100% 100%,0 100%)}',
+      /* mac 桌面端 DSH 在菜单下面垫了一层不跟着切角走的实色底（_backing），切角处会露出一块 */
+      B + ' ' + C('backing') + '{display:none}',
+      B + ' [data-menu-material]{--hos-cl:var(--hos-hair);border:1px solid var(--hos-cl)!important;box-shadow:none!important;clip-path:polygon(0 0,calc(100% - 11px) 0,100% 11px,100% 100%,0 100%)}',
+      /* 菜单的底色画在里层 material 上，斜线只能叠在最上面 */
+      B + ' [data-menu-material]::after{content:"";position:absolute;inset:-1px;pointer-events:none;z-index:2;background:' + cutTR(11) + '}',
       B + ' [data-menu-material] > ' + C('material') + '{background:linear-gradient(180deg,var(--hos-glass-hi),transparent 60%),color-mix(in srgb,var(--hos-bg-2) 96%,transparent)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}',
       B + ' [data-menu-material] ' + C('item') + '{font-size:13px}',
       B + ' [data-menu-material] ' + C('item') + C('selected') + '{color:var(--hos-ink)}',
@@ -409,6 +426,10 @@ window.__ModuleLoader__.load({
       B + ' [data-shortcut-modal=settings] :is(' + C('row') + ',' + C('setting') + '){border-bottom:1px solid var(--hos-hair-soft)}',
       B + ' [data-shortcut-modal=settings] :is(' + C('desc') + ',' + C('description') + ',' + C('settingDescription') + '){color:var(--hos-muted)}',
       B + ' [data-shortcut-modal=settings] ' + C('selector') + '{border:1px solid var(--hos-hair)!important;background:transparent!important}',
+      /* 「编辑快捷键」和字号步进器原生没有边框（暗色下又是实心块），和同页的下拉框统一成发丝框 */
+      B + ' [data-shortcut-modal=settings] ' + C('setting') + ' > ' + C('button') + ',' + B + ' [data-shortcut-modal=settings] ' + C('stepper') + '{border:1px solid var(--hos-hair)!important;background:transparent!important}',
+      B + ' [data-shortcut-modal=settings] ' + C('setting') + ' > ' + C('button') + '{padding:5px 12px}',
+      B + ' [data-shortcut-modal=settings] ' + C('setting') + ' > ' + C('button') + ':hover{background:var(--hos-hair-soft)!important}',
       B + ' [data-shortcut-modal=settings] ' + C('themeCube') + '{border:1px solid var(--hos-hair)!important}',
       B + ' [data-shortcut-modal=settings] ' + C('themeCube') + C('selected') + '{border-color:var(--hos-ink)!important}',
       /* 开关：方槽方钮，开启时槽填墨、钮点强调色 */
