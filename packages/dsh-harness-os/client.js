@@ -136,6 +136,8 @@ window.__ModuleLoader__.load({
       /* 机框：外框内缩 26px，与启动动画终幕的 .dsu-frame 同坐标 */
       B + '[data-hos-chassis] [data-slot=root]>' + C('frame') + '{box-sizing:border-box;padding:var(--hos-inset);background:transparent}',
       B + ' [data-slot=root]>' + C('frame') + '{background:transparent}',
+      /* 右侧栏拖动柄：DSH 按「整框宽 − 右栏宽」定位，没算机框左右两侧的内边距，柄比分界线偏右 2 × inset */
+      B + '[data-hos-chassis] [data-slot=root]>' + C('frame') + '>' + C('handle') + '[data-side=rightbar]{translate:calc(-2 * var(--hos-inset)) 0}',
       B + ' ' + C('sidebarCol') + ',' + B + ' ' + C('centerCol') + ',' + B + ' ' + C('rightbarCol') + '{background:transparent}',
       B + ' ' + C('sidebarCol') + '{border-right:1px solid var(--hos-hair);background:linear-gradient(180deg,color-mix(in srgb,var(--hos-glass) 70%,transparent),color-mix(in srgb,var(--hos-glass) 30%,transparent))}',
       B + ' [data-slot=sidebar],' + B + ' [data-slot=sidebar] ' + C('root') + '{background:transparent}',
@@ -144,6 +146,12 @@ window.__ModuleLoader__.load({
       '#hos-chrome[hidden]{display:none}',
       '#hos-chrome .hos-line{position:absolute;inset:var(--hos-inset);border:1px solid var(--hos-hair);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 0 rgba(0,0,0,.3)}',
       'body:not([data-hos-chassis]) #hos-chrome .hos-line,body:not([data-hos-chassis]) #hos-chrome .hos-c{display:none}',
+      /* macOS 桌面端：红绿灯压在机框左上角，顶线和左线在那一段留缺口，左上定位角隐藏 */
+      'html[data-platform=darwin] #hos-chrome .hos-line{clip-path:polygon(64px 0,100% 0,100% 100%,0 100%,0 20px,64px 20px)}',
+      'html[data-platform=darwin] #hos-chrome .hos-c.tl{visibility:hidden}',
+      /* 顶部拖动带：机框内缩出来的 26px 原本不是拖动区，把它补成窗口拖动区 */
+      '#hos-chrome .hos-drag{position:absolute;left:0;right:0;top:0;height:var(--hos-inset);pointer-events:auto;-webkit-app-region:drag;app-region:drag}',
+      'body:not([data-hos-chassis]) #hos-chrome .hos-drag{display:none}',
       '#hos-chrome .hos-c{position:absolute;width:26px;height:26px}',
       '#hos-chrome .hos-c::before,#hos-chrome .hos-c::after{content:"";position:absolute;background:var(--hos-ink);opacity:.62}',
       '#hos-chrome .hos-c::before{width:100%;height:1px}#hos-chrome .hos-c::after{width:1px;height:100%}',
@@ -241,13 +249,11 @@ window.__ModuleLoader__.load({
       /* 输入卡：切角 + 磨砂 */
       CV + ' [data-composer-card=true]{border:1px solid var(--hos-hair)!important;background:linear-gradient(180deg,var(--hos-glass-hi),transparent 48%),var(--hos-glass)!important;-webkit-backdrop-filter:blur(15px) saturate(1.18);backdrop-filter:blur(15px) saturate(1.18);box-shadow:none!important;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}',
       /* 切角补一道发丝斜线（clip-path 切掉的角不会自己画边） */
-      CV + ' [data-composer-card=true]{background:linear-gradient(to top right,transparent calc(50% - 1px),var(--hos-hair) calc(50% - 1px),var(--hos-hair) calc(50% + .5px),transparent calc(50% + .5px)) top right/16px 16px no-repeat,linear-gradient(to top right,transparent calc(50% - 1px),var(--hos-hair) calc(50% - 1px),var(--hos-hair) calc(50% + .5px),transparent calc(50% + .5px)) bottom left/16px 16px no-repeat,linear-gradient(180deg,var(--hos-glass-hi),transparent 48%),var(--hos-glass)!important;border-color:color-mix(in srgb,var(--hos-ink) 20%,transparent)!important}',
+      CV + ' [data-composer-card=true]{background:linear-gradient(to top right,transparent calc(50% - 1px),var(--hos-hair) calc(50% - 1px),var(--hos-hair) calc(50% + .5px),transparent calc(50% + .5px)) top right/16px 16px no-repeat,linear-gradient(to top right,transparent calc(50% - 1px),var(--hos-hair) calc(50% - 1px),var(--hos-hair) calc(50% + .5px),transparent calc(50% + .5px)) bottom left/16px 16px no-repeat,var(--hos-glass)!important;border-color:color-mix(in srgb,var(--hos-ink) 20%,transparent)!important}',
       CV + ' [data-composer-card=true] [data-composer-input]{min-height:44px}',
-      /* 加号、冻结追加等次要按钮：和胶囊同一套 */
+      /* 加号：去掉原生的底块（input.right 槽留给第三方插件，不动） */
       CV + ' [data-composer-card=true] ' + C('add') + '{background:transparent!important;border:1px solid transparent!important;box-shadow:none!important;color:var(--hos-ink-soft)}',
       CV + ' [data-composer-card=true] ' + C('add') + ':hover{background:var(--hos-hair-soft)!important}',
-      CV + ' [data-slot="conversation.input.right"] button{border:1px solid var(--hos-hair-soft)!important;background:var(--hos-hair-soft)!important;box-shadow:none!important;color:var(--hos-ink-soft);font-size:12px}',
-      CV + ' [data-slot="conversation.input.right"] button:hover{border-color:var(--hos-hair)!important;color:var(--hos-ink)}',
       CV + ' [data-slot="conversation.input.model"] ' + C('trigger') + '{background:transparent!important;border:0!important;box-shadow:none!important}',
       CV + ' [data-slot="conversation.input.model"] ' + C('trigger') + ':hover{background:var(--hos-hair-soft)!important}',
       CV + ' [data-slot="conversation.input.model"] ' + C('triggerEffort') + '{font-family:var(--hos-mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--hos-accent-ink)!important}',
@@ -257,7 +263,9 @@ window.__ModuleLoader__.load({
       /* 待办 / 目标 / 队列：贴在输入框上方的切角卡 */
       CV + ' [data-slot="conversation.input.dock"] :is([data-testid=todo-panel],[data-goal-bar],[data-queue-dock]){border:1px solid var(--hos-hair)!important;border-bottom:0!important;background:linear-gradient(180deg,var(--hos-glass-hi),transparent 70%),var(--hos-glass)!important;box-shadow:none!important;-webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}',
       /* 输入框座位的淡出渐变：原生在暗色下渐变到写死的中性灰，改成渐变到底板色 */
-      CV + ' ' + C('composerSeat') + '{background:linear-gradient(color-mix(in srgb,var(--hos-bg) 0%,transparent) 0,color-mix(in srgb,var(--hos-bg) 82%,transparent) 36px)!important}',
+      CV + ' ' + C('composerSeat') + '{background:none!important;isolation:isolate}',
+      CV + ' [data-content-phase=active] ' + C('composerSeat') + '::before{content:"";position:absolute;left:0;right:0;top:-24px;bottom:0;z-index:-1;pointer-events:none;background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,auto,auto;background-attachment:fixed;background-blend-mode:overlay,normal,normal;-webkit-mask-image:linear-gradient(transparent,#000 30px);mask-image:linear-gradient(transparent,#000 30px)}',
+      D + ' [data-slot="main.conversation"] [data-content-phase=active] ' + C('composerSeat') + '::before{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%);background-size:420px 420px,auto,auto;background-attachment:fixed}',
       /* 信号轨迹只属于空会话页 */
       CV + ' > [data-phase=active] .hos-trace{display:none}',
       CV + ' [data-composer-card=true]:focus-within{border-color:color-mix(in srgb,var(--hos-ink) 45%,transparent)!important}',
@@ -327,6 +335,13 @@ window.__ModuleLoader__.load({
       CV + ' ' + C('detailsTitle') + '{font-weight:600;letter-spacing:.04em}',
       CV + ' ' + C('detailTabActive') + '{background:var(--hos-box-bg)!important;color:var(--hos-box-ink)!important}',
       CV + ' :is(' + C('jsonPayload') + ',' + C('programSource') + ',' + C('programOutput') + ',' + C('sourceBlock') + '){border:1px solid var(--hos-hair)!important;font-family:var(--hos-mono)}'
+    ]
+
+    /* ── 5c. 全局面板：插件页、插件市场等（含第三方插件页） ─────────── */
+    /* 层级底色压到接近底板，吸顶区和卡片不再在底板上浮成亮块 */
+    var PANELS = [
+      B + ' [data-slot=main] > :not([data-slot="main.conversation"]){--dsw-alias-bg-layer-1:transparent;--dsw-alias-bg-layer-2:color-mix(in srgb,var(--hos-glass) 70%,transparent);--dsw-alias-bg-layer-3:color-mix(in srgb,var(--hos-glass) 85%,transparent);--dsw-alias-bg-base:transparent}',
+      B + ' [data-slot=main] > :not([data-slot="main.conversation"]) :is(input[type=search],input[type=text],input:not([type])){background:transparent!important;box-shadow:none!important}'
     ]
 
     /* ── 6. 右侧栏（停靠列） ─────────────────────────────────────────── */
@@ -420,7 +435,7 @@ window.__ModuleLoader__.load({
     function cssText() {
       var a = ACCENTS[S.accent] || ACCENTS.orange
       var acc = B + '{--hos-accent:' + a[0] + ';--hos-accent-ink:' + a[1] + '}' + D + '{--hos-accent-ink:' + a[2] + '}'
-      return [].concat(TOKENS, [acc], BASE, SIDEBAR, HERO, FLOW, TRAJ, DOCK, POP, MOTION).join('\n')
+      return [].concat(TOKENS, [acc], BASE, SIDEBAR, HERO, FLOW, TRAJ, PANELS, DOCK, POP, MOTION).join('\n')
     }
     var styleTag = null
     function injectCss() {
@@ -494,7 +509,7 @@ window.__ModuleLoader__.load({
       chrome.id = 'hos-chrome'
       chrome.setAttribute('aria-hidden', 'true')
       chrome.innerHTML =
-        '<div class="hos-line"></div><i class="hos-c tl"></i><i class="hos-c tr"></i><i class="hos-c bl"></i><i class="hos-c br"></i>' +
+        '<div class="hos-drag" data-window-drag="true"></div><div class="hos-line"></div><i class="hos-c tl"></i><i class="hos-c tr"></i><i class="hos-c bl"></i><i class="hos-c br"></i>' +
         '<div class="hos-scan"></div>' +
         '<div class="hos-brand"><div class="b1">DEEPSEEK</div><div class="b2">SYNTHESIZE INTELLIGENCE</div><div class="b3"><b>HARNESS</b><span>OS</span></div></div>' +
         '<div class="hos-boot"><div class="hos-meta"><span class="rev"></span><span class="clk">--:--:--</span></div><div class="hos-slats"><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div></div>' +
@@ -555,7 +570,7 @@ window.__ModuleLoader__.load({
     function ensure() {
       raf = 0
       if (!document.body.hasAttribute('data-hos')) return
-      ensureSys(); ensureHero(); ensureGuide(); watchSplash()
+      ensureSys(); ensureHero(); ensureGuide(); watchSplash(); syncSide()
     }
     function schedule() { if (!raf) raf = requestAnimationFrame(ensure) }
 
@@ -580,14 +595,15 @@ window.__ModuleLoader__.load({
         sys.querySelector('.st > span').textContent = busy ? 'running · ' + Math.round((Date.now() - runningSince) / 1000) + 's' : 'ready'
       }
       drawTrace()
+      syncSide()
     }
-    var sideRO = null
-    function watchSide() {
-      var col = q(C('sidebarCol'))
-      if (!col || !window.ResizeObserver || !chrome) return
-      if (sideRO) sideRO.disconnect()
-      sideRO = new ResizeObserver(function () { chrome.classList.toggle('side-off', col.getBoundingClientRect().width < 160) })
-      sideRO.observe(col)
+    /* 侧栏收起时品牌块要让位（macOS 收起会整列隐藏、DSH 把收起按钮放进顶栏）。
+       侧栏节点会被替换，所以不用 ResizeObserver，每次 ensure / tick / resize 都量一次。 */
+    function syncSide() {
+      if (!chrome) return
+      var side = q('[data-slot=sidebar]')
+      var r = side && side.getBoundingClientRect()
+      chrome.classList.toggle('side-off', !r || r.width < 160 || r.height < 100)
     }
 
     /* ── 与开机动画衔接 ─────────────────────────────────────────────────── */
@@ -656,7 +672,7 @@ window.__ModuleLoader__.load({
       setPhase('docked')
       watchSplash()
       ensure()
-      watchSide()
+      window.addEventListener('resize', syncSide)
       bodyMO = new MutationObserver(schedule)
       bodyMO.observe(document.body, { childList: true, subtree: true })
       window.addEventListener('dsh-startup:handoff', onHandoff)
@@ -670,7 +686,7 @@ window.__ModuleLoader__.load({
       if (raf) cancelAnimationFrame(raf); raf = 0
       if (bodyMO) bodyMO.disconnect(); bodyMO = null
       if (splashMO) splashMO.disconnect(); splashMO = null; splashRoot = null
-      if (sideRO) sideRO.disconnect(); sideRO = null
+      window.removeEventListener('resize', syncSide)
       window.removeEventListener('dsh-startup:handoff', onHandoff)
       window.removeEventListener('dsh-startup:done', onDone)
       if (styleTag) styleTag.remove(); styleTag = null

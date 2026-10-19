@@ -2180,3 +2180,59 @@
   #dsh-startup-root .dsu-grain { animation: none; }
   #dsh-startup-root .dsu-field { transition: none; }
 }
+
+/* ── [dsh-harness-os fork] 档案面板 → 横移的玻璃；自检去掉外框；macOS 红绿灯让位 ──
+   1. 右侧三块档案面板不再是带投影的实心板，改成半透明玻璃：互相叠化，按远 / 中 / 近
+      三种速度缓慢横移（视差），左侧那块竖条面板在 splash.js 里去掉了。
+   2. SELF-CHECK 只留文字和行线，去掉外框、底色、投影和切角——悬浮的框读起来像一块
+      贴上去的代码片段，出戏。
+   3. macOS 桌面端（html[data-platform=darwin]）的红绿灯压在机框左上角：机框顶线和
+      左线在红绿灯区域留缺口，左上定位角隐藏。 */
+#dsh-startup-root .dsu-wm {
+  border: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 0;
+  box-shadow: none;
+  filter: none;
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+  backdrop-filter: blur(10px) saturate(1.05);
+  animation: dsu-glass-drift 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+#dsh-startup-root:not(.dsu-dark) .dsu-wm {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.10) 55%, rgba(255, 255, 255, 0.22));
+  border-left-color: rgba(255, 255, 255, 0.7);
+  box-shadow: none;
+}
+#dsh-startup-root.dsu-dark .dsu-wm {
+  background: linear-gradient(90deg, rgba(180, 210, 225, 0.07), rgba(180, 210, 225, 0.015) 55%, rgba(180, 210, 225, 0.045));
+  border-left-color: rgba(180, 210, 225, 0.14);
+  box-shadow: none;
+}
+#dsh-startup-root .dsu-wm-far { opacity: 0.45; animation-duration: 34s; animation-delay: -6s; }
+#dsh-startup-root .dsu-wm-mid { opacity: 0.7; animation-duration: 26s; animation-delay: -15s; }
+#dsh-startup-root .dsu-wm-mid + .dsu-wm-mid { animation-duration: 21s; animation-delay: -3s; }
+@keyframes dsu-glass-drift {
+  from { transform: translateX(-3.5vw); }
+  to { transform: translateX(3.5vw); }
+}
+
+#dsh-startup-root .dsu-checks {
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  clip-path: none !important;
+}
+#dsh-startup-root .dsu-checks::before,
+#dsh-startup-root .dsu-checks::after { display: none !important; }
+
+html[data-platform='darwin'] #dsh-startup-root .dsu-frame::before {
+  clip-path: polygon(64px 0, 100% 0, 100% 100%, 0 100%, 0 20px, 64px 20px);
+}
+html[data-platform='darwin'] #dsh-startup-root .dsu-c-tl { visibility: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  #dsh-startup-root .dsu-wm { animation: none; }
+}
