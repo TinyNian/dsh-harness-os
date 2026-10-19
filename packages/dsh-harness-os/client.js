@@ -128,8 +128,8 @@ window.__ModuleLoader__.load({
     var NOT_ROUND = ':not(#dsh-startup-root,#dsh-startup-root *,svg *,[role=progressbar],[class*="pinner"],[class*="avatar"],[class*="Avatar"])'
     var BASE = [
       'html:has(body[data-hos]){background:var(--hos-bg,#dedbd4)}',
-      B + '{background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%) fixed;background-size:420px 420px,auto,auto;background-blend-mode:overlay,normal,normal;color:var(--hos-ink)}',
-      D + '{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%) fixed;background-size:420px 420px,auto,auto}',
+      B + '{background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,auto,auto;background-attachment:fixed;background-blend-mode:overlay,normal,normal;color:var(--hos-ink)}',
+      D + '{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%);background-size:420px 420px,auto,auto;background-attachment:fixed}',
       /* 档案风格只有直角：全局去掉圆角（启动动画、svg 内部、进度与头像除外） */
       B + ' *' + NOT_ROUND + '{border-radius:0!important}',
       B + ' ::selection{background:color-mix(in srgb,var(--hos-accent) 28%,transparent)}',
@@ -149,8 +149,14 @@ window.__ModuleLoader__.load({
       /* macOS 桌面端：红绿灯压在机框左上角，顶线和左线在那一段留缺口，左上定位角隐藏 */
       'html[data-platform=darwin] #hos-chrome .hos-line{clip-path:polygon(64px 0,100% 0,100% 100%,0 100%,0 20px,64px 20px)}',
       'html[data-platform=darwin] #hos-chrome .hos-c.tl{visibility:hidden}',
+      /* 侧栏收起时 DSH 把「展开侧栏 / 新会话」放到红绿灯旁边：顶线缺口加长到它们之后 */
+      'html[data-platform=darwin] #hos-chrome.side-off .hos-line{clip-path:polygon(190px 0,100% 0,100% 100%,0 100%,0 20px,190px 20px)}',
+      /* 有机框时顶栏已经在左上角控件下方，DSH 给顶栏加的让位缩进不需要 */
+      B + '[data-hos-chassis] [data-slot="main.conversation"]{--dsh-frame-leading-clearance:0px}',
       /* 顶部拖动带：机框内缩出来的 26px 原本不是拖动区，把它补成窗口拖动区 */
       '#hos-chrome .hos-drag{position:absolute;left:0;right:0;top:0;height:var(--hos-inset);pointer-events:auto;-webkit-app-region:drag;app-region:drag}',
+      /* macOS：左上角是红绿灯和收起侧栏后的两个按钮，拖动区从它们右侧开始，否则按钮点不动 */
+      'html[data-platform=darwin] #hos-chrome .hos-drag{left:240px}',
       'body:not([data-hos-chassis]) #hos-chrome .hos-drag{display:none}',
       '#hos-chrome .hos-c{position:absolute;width:26px;height:26px}',
       '#hos-chrome .hos-c::before,#hos-chrome .hos-c::after{content:"";position:absolute;background:var(--hos-ink);opacity:.62}',
@@ -601,9 +607,11 @@ window.__ModuleLoader__.load({
        侧栏节点会被替换，所以不用 ResizeObserver，每次 ensure / tick / resize 都量一次。 */
     function syncSide() {
       if (!chrome) return
-      var side = q('[data-slot=sidebar]')
-      var r = side && side.getBoundingClientRect()
-      chrome.classList.toggle('side-off', !r || r.width < 160 || r.height < 100)
+      /* 量侧栏那一列：[data-slot] 槽位节点是 display: contents，量不出尺寸 */
+      var col = q('[data-slot=root] ' + C('sidebarCol'))
+      var r = col && col.getBoundingClientRect()
+      var off = !r || r.width < 160 || r.height < 100 || getComputedStyle(col).visibility === 'hidden'
+      chrome.classList.toggle('side-off', off)
     }
 
     /* ── 与开机动画衔接 ─────────────────────────────────────────────────── */
