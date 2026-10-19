@@ -128,8 +128,8 @@ window.__ModuleLoader__.load({
     var NOT_ROUND = ':not(#dsh-startup-root,#dsh-startup-root *,svg *,[role=progressbar],[class*="pinner"],[class*="avatar"],[class*="Avatar"])'
     var BASE = [
       'html:has(body[data-hos]){background:var(--hos-bg,#dedbd4)}',
-      B + '{background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,auto,auto;background-attachment:fixed;background-blend-mode:overlay,normal,normal;color:var(--hos-ink)}',
-      D + '{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%);background-size:420px 420px,auto,auto;background-attachment:fixed}',
+      B + '{background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:fixed;background-blend-mode:overlay,normal,normal;color:var(--hos-ink)}',
+      D + '{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:fixed}',
       /* 档案风格只有直角：全局去掉圆角（启动动画、svg 内部、进度与头像除外） */
       B + ' *' + NOT_ROUND + '{border-radius:0!important}',
       B + ' ::selection{background:color-mix(in srgb,var(--hos-accent) 28%,transparent)}',
@@ -150,7 +150,7 @@ window.__ModuleLoader__.load({
       'html[data-platform=darwin] #hos-chrome .hos-line{clip-path:polygon(64px 0,100% 0,100% 100%,0 100%,0 20px,64px 20px)}',
       'html[data-platform=darwin] #hos-chrome .hos-c.tl{visibility:hidden}',
       /* 侧栏收起时 DSH 把「展开侧栏 / 新会话」放到红绿灯旁边：顶线缺口加长到它们之后 */
-      'html[data-platform=darwin] #hos-chrome.side-off .hos-line{clip-path:polygon(190px 0,100% 0,100% 100%,0 100%,0 20px,190px 20px)}',
+      'html[data-platform=darwin] body:has([data-slot=root] > [data-sidebar-collapsed=true]) #hos-chrome .hos-line{clip-path:polygon(var(--hos-cut,130px) 0,100% 0,100% 100%,0 100%,0 20px,var(--hos-cut,130px) 20px)}',
       /* 有机框时顶栏已经在左上角控件下方，DSH 给顶栏加的让位缩进不需要 */
       B + '[data-hos-chassis] [data-slot="main.conversation"]{--dsh-frame-leading-clearance:0px}',
       /* 顶部拖动带：机框内缩出来的 26px 原本不是拖动区，把它补成窗口拖动区 */
@@ -172,7 +172,10 @@ window.__ModuleLoader__.load({
       '#hos-chrome .hos-brand .b3{font-size:30px;font-weight:400;line-height:1.06;letter-spacing:.012em;display:flex;gap:9px;align-items:baseline}',
       '#hos-chrome .hos-brand .b3 b{font-weight:700}',
       'body[data-hos-phase=docked] #hos-chrome .hos-brand{transform:scale(.56)}',
-      '#hos-chrome.side-off .hos-brand{opacity:0}',
+      /* 侧栏收起：DSH 在收起那一刻就给外框打 data-sidebar-collapsed，logo 跟着侧栏加速向左滑出；
+         展开时稍后从左侧滑回，用开机动画的入场曲线 */
+      'body:has([data-slot=root] > [data-sidebar-collapsed=true]) #hos-chrome .hos-brand{opacity:0;transform:translateX(-44px) scale(.56);transition:transform 280ms cubic-bezier(.55,0,1,.45),opacity 200ms ease-in}',
+      'body[data-hos-phase=docked]:not(:has([data-slot=root] > [data-sidebar-collapsed=true])) #hos-chrome .hos-brand{transition:transform 560ms ' + EASE + ' 140ms,opacity 380ms ease 140ms}',
       'body:not([data-hos-chassis]) #hos-chrome .hos-brand{left:20px;top:18px}',
       /* 开机读数：只在揭幕时接住启动页，随后退场 */
       '#hos-chrome .hos-meta{position:absolute;left:46px;top:170px;display:flex;gap:10px;white-space:nowrap;font-family:var(--hos-mono);font-size:10px;letter-spacing:.16em;color:var(--hos-muted)}',
@@ -196,7 +199,7 @@ window.__ModuleLoader__.load({
     var SB = B + ' [data-slot=sidebar]'
     var SIDEBAR = [
       /* 原生 logo 让位给覆盖层的品牌块；按钮本身保留（点它仍是新建会话） */
-      SB + ' ' + C('logoRow') + '{min-height:74px;align-items:flex-start;padding-top:6px}',
+      SB + ' ' + C('logoRow') + '{box-sizing:border-box;min-height:var(--hos-logo-h,74px);height:auto;align-items:flex-start;padding-top:var(--hos-logo-pad,6px)!important}',
       SB + ' ' + C('brandIdentity') + '{opacity:0}',
       SB + ' ' + C('brand') + '{min-width:118px;min-height:50px}',
         /* 揭幕时 logo 行下方撑开 118px 给开机读数让位（收起按钮留在顶部），收起后回到原位 */
@@ -270,8 +273,8 @@ window.__ModuleLoader__.load({
       CV + ' [data-slot="conversation.input.dock"] :is([data-testid=todo-panel],[data-goal-bar],[data-queue-dock]){border:1px solid var(--hos-hair)!important;border-bottom:0!important;background:linear-gradient(180deg,var(--hos-glass-hi),transparent 70%),var(--hos-glass)!important;box-shadow:none!important;-webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}',
       /* 输入框座位的淡出渐变：原生在暗色下渐变到写死的中性灰，改成渐变到底板色 */
       CV + ' ' + C('composerSeat') + '{background:none!important;isolation:isolate}',
-      CV + ' [data-content-phase=active] ' + C('composerSeat') + '::before{content:"";position:absolute;left:0;right:0;top:-24px;bottom:0;z-index:-1;pointer-events:none;background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,auto,auto;background-attachment:fixed;background-blend-mode:overlay,normal,normal;-webkit-mask-image:linear-gradient(transparent,#000 30px);mask-image:linear-gradient(transparent,#000 30px)}',
-      D + ' [data-slot="main.conversation"] [data-content-phase=active] ' + C('composerSeat') + '::before{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%);background-size:420px 420px,auto,auto;background-attachment:fixed}',
+      CV + ' [data-content-phase=active] ' + C('composerSeat') + '::before{content:"";position:absolute;left:0;right:0;top:-24px;bottom:0;z-index:-1;pointer-events:none;background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:scroll;background-position:var(--hos-seat-x,0) var(--hos-seat-y,0);background-blend-mode:overlay,normal,normal;-webkit-mask-image:linear-gradient(transparent,#000 30px);mask-image:linear-gradient(transparent,#000 30px)}',
+      D + ' [data-slot="main.conversation"] [data-content-phase=active] ' + C('composerSeat') + '::before{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:scroll;background-position:var(--hos-seat-x,0) var(--hos-seat-y,0)}',
       /* 信号轨迹只属于空会话页 */
       CV + ' > [data-phase=active] .hos-trace{display:none}',
       CV + ' [data-composer-card=true]:focus-within{border-color:color-mix(in srgb,var(--hos-ink) 45%,transparent)!important}',
@@ -612,6 +615,26 @@ window.__ModuleLoader__.load({
       var r = col && col.getBoundingClientRect()
       var off = !r || r.width < 160 || r.height < 100 || getComputedStyle(col).visibility === 'hidden'
       chrome.classList.toggle('side-off', off)
+      var bs = document.body.style
+      /* logo 收成后中心在视口 y=67（顶 44 + 高 46 的一半）：收起按钮（28px）中心对上它，新会话在 logo 下方 18px */
+      var row = q('[data-slot=sidebar] ' + C('logoRow'))
+      if (row && !off) {
+        var top = row.getBoundingClientRect().top
+        bs.setProperty('--hos-logo-pad', Math.max(0, Math.round(67 - 14 - top)) + 'px')
+        bs.setProperty('--hos-logo-h', Math.max(40, Math.round(44 + 46 + 18 - top)) + 'px')
+      }
+      /* 折叠后左上角是「展开侧栏 / 新会话」两个按钮：机框顶线从它们右边 10px 开始 */
+      var lead = document.querySelectorAll('[data-slot="shell.leading"] button')
+      var right = 0
+      for (var i = 0; i < lead.length; i++) right = Math.max(right, lead[i].getBoundingClientRect().right)
+      if (right) bs.setProperty('--hos-cut', Math.round(right + 10 - 26) + 'px')
+      /* 输入框座位的底板按它在视口里的位置反向偏移，和整页底板逐像素对上 */
+      var seat = q('[data-slot="main.conversation"] [data-content-phase=active] ' + C('composerSeat'))
+      if (seat) {
+        var sr = seat.getBoundingClientRect()
+        bs.setProperty('--hos-seat-x', Math.round(-sr.left) + 'px')
+        bs.setProperty('--hos-seat-y', Math.round(-(sr.top - 24)) + 'px')
+      }
     }
 
     /* ── 与开机动画衔接 ─────────────────────────────────────────────────── */
@@ -702,6 +725,7 @@ window.__ModuleLoader__.load({
       document.querySelectorAll('.hos-sys,.hos-hero-en,.hos-hero-rule,.hos-reticle,.hos-trace,.hos-guide-ret').forEach(function (n) { n.remove() })
       tracePaths = []
       ;['data-hos', 'data-hos-chassis', 'data-hos-motion', 'data-hos-phase'].forEach(function (a) { document.body.removeAttribute(a) })
+      ;['--hos-logo-pad', '--hos-logo-h', '--hos-cut', '--hos-seat-x', '--hos-seat-y'].forEach(function (v) { document.body.style.removeProperty(v) })
     }
     function update(next) {
       S = next
