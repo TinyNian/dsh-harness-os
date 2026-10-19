@@ -362,6 +362,8 @@ window.__ModuleLoader__.load({
     /* ── 6. 右侧栏（停靠列） ─────────────────────────────────────────── */
     var RB = B + ' [data-slot=rightbar]'
     var DOCK = [
+      /* dockkit 的停靠标签页宿主用 bg-base 实色铺底，会盖住面板玻璃（桌面端底板生效后尤其显眼）；浮动窗保留自己的层级底色 */
+      B + ' ' + C('tabHost') + ':not(' + C('float') + '),' + B + ' ' + C('emptyTabHost') + '{background:transparent}',
       RB + ' ' + C('panel') + '[data-sidebar-right-open=true]{border-left:1px solid var(--hos-hair);background:linear-gradient(180deg,color-mix(in srgb,var(--hos-glass) 55%,transparent),color-mix(in srgb,var(--hos-glass) 22%,transparent))!important;box-shadow:none!important}',
       RB + ' [data-dockkit-strip]{border-bottom:1px solid var(--hos-hair)}',
       RB + ' [data-dockkit-tab]{border:1px solid var(--hos-hair-soft);font-size:12.5px}',
