@@ -70,6 +70,7 @@ window.__ModuleLoader__.load({
     var B = 'body[data-hos]'
     var D = 'body[data-hos][data-ds-dark-theme]'
     var EASE = 'cubic-bezier(0.16, 0.84, 0.24, 1)'
+    var FOLD_MS = 400, FOLD_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)'
     var BRUSH = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.82 0.014' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncR type='linear' slope='0.10' intercept='0.45'/><feFuncG type='linear' slope='0.10' intercept='0.45'/><feFuncB type='linear' slope='0.10' intercept='0.45'/><feFuncA type='linear' slope='0' intercept='1'/></feComponentTransfer></filter><rect width='420' height='420' filter='url(%23b)'/></svg>\")"
 
     /* ── 1. 主题变量 ───────────────────────────────────────────────────── */
@@ -128,8 +129,10 @@ window.__ModuleLoader__.load({
     var NOT_ROUND = ':not(#dsh-startup-root,#dsh-startup-root *,svg *,[role=progressbar],[class*="pinner"],[class*="avatar"],[class*="Avatar"])'
     var BASE = [
       'html:has(body[data-hos]){background:var(--hos-bg,#dedbd4)}',
-      B + '{background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:fixed;background-blend-mode:overlay,normal,normal;color:var(--hos-ink)}',
-      D + '{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:fixed}',
+      /* macOS 桌面端 DSH 用 html[data-platform=darwin] body{background:transparent} 透出原生毛玻璃，
+         优先级比 body[data-hos] 高；底板要压过它，否则整页只剩 html 的纯色，和输入框座位的底板对不上 */
+      B + ',html[data-platform] ' + B + '{background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:fixed;background-blend-mode:overlay,normal,normal;color:var(--hos-ink)}',
+      D + ',html[data-platform] ' + D + '{background:' + BRUSH + ',radial-gradient(90% 70% at 50% 46%,rgba(40,70,86,.32) 0%,rgba(0,0,0,0) 62%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 46%,#05070a 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:fixed}',
       /* 档案风格只有直角：全局去掉圆角（启动动画、svg 内部、进度与头像除外） */
       B + ' *' + NOT_ROUND + '{border-radius:0!important}',
       B + ' ::selection{background:color-mix(in srgb,var(--hos-accent) 28%,transparent)}',
@@ -172,10 +175,13 @@ window.__ModuleLoader__.load({
       '#hos-chrome .hos-brand .b3{font-size:30px;font-weight:400;line-height:1.06;letter-spacing:.012em;display:flex;gap:9px;align-items:baseline}',
       '#hos-chrome .hos-brand .b3 b{font-weight:700}',
       'body[data-hos-phase=docked] #hos-chrome .hos-brand{transform:scale(.56)}',
-      /* 侧栏收起：DSH 在收起那一刻就给外框打 data-sidebar-collapsed，logo 跟着侧栏加速向左滑出；
-         展开时稍后从左侧滑回，用开机动画的入场曲线 */
-      'body:has([data-slot=root] > [data-sidebar-collapsed=true]) #hos-chrome .hos-brand{opacity:0;transform:translateX(-44px) scale(.56);transition:transform 280ms cubic-bezier(.55,0,1,.45),opacity 200ms ease-in}',
-      'body[data-hos-phase=docked]:not(:has([data-slot=root] > [data-sidebar-collapsed=true])) #hos-chrome .hos-brand{transition:transform 560ms ' + EASE + ' 140ms,opacity 380ms ease 140ms}',
+      /* 侧栏收起 / 展开：logo 算侧栏的一部分，随折叠动画被侧栏右边缘裁掉或露出（--hos-brand-clip 由脚本逐帧算）；
+         收起后的稳态靠 opacity 藏住，等折叠播完再切，避免最后一帧闪一下 */
+      '#hos-chrome .hos-brand{clip-path:inset(0 var(--hos-brand-clip,0px) 0 0)}',
+      /* macOS 桌面端收起后侧栏列宽为 0，DSH 的窄栏（rail）只会在折叠途中从幕布边缘闪出来，直接藏掉 */
+      'html[data-platform=darwin] [data-slot=root] > [data-sidebar-collapsed=true] > ' + C('sidebarCol') + ' ' + C('collapsed') + '{visibility:hidden}',
+      'body:has([data-slot=root] > [data-sidebar-collapsed=true]) #hos-chrome .hos-brand{opacity:0;transition:transform 720ms ' + EASE + ',opacity 0s linear ' + FOLD_MS + 'ms}',
+      'body[data-hos-phase=docked]:not(:has([data-slot=root] > [data-sidebar-collapsed=true])) #hos-chrome .hos-brand{transition:transform 720ms ' + EASE + ',opacity 0s}',
       'body:not([data-hos-chassis]) #hos-chrome .hos-brand{left:20px;top:18px}',
       /* 开机读数：只在揭幕时接住启动页，随后退场 */
       '#hos-chrome .hos-meta{position:absolute;left:46px;top:170px;display:flex;gap:10px;white-space:nowrap;font-family:var(--hos-mono);font-size:10px;letter-spacing:.16em;color:var(--hos-muted)}',
@@ -579,7 +585,7 @@ window.__ModuleLoader__.load({
     function ensure() {
       raf = 0
       if (!document.body.hasAttribute('data-hos')) return
-      ensureSys(); ensureHero(); ensureGuide(); watchSplash(); syncSide()
+      ensureSys(); ensureHero(); ensureGuide(); watchSplash(); watchFrame(); syncSide()
     }
     function schedule() { if (!raf) raf = requestAnimationFrame(ensure) }
 
@@ -634,6 +640,53 @@ window.__ModuleLoader__.load({
         var sr = seat.getBoundingClientRect()
         bs.setProperty('--hos-seat-x', Math.round(-sr.left) + 'px')
         bs.setProperty('--hos-seat-y', Math.round(-(sr.top - 24)) + 'px')
+      }
+      if (frameEl && !frameAnim) frameCols = getComputedStyle(frameEl).gridTemplateColumns
+    }
+
+    /* ── 左右侧栏折叠动画 ───────────────────────────────────────────────
+       DSH 收起 / 展开时直接改外框的 grid-template-columns（原生那条 0.3s 过渡没起作用，列宽是跳过去的）。
+       这里在同一帧里接住新旧列宽，用 Web Animations 补一段过渡；拖动改宽不算收起，不动画。 */
+    var frameEl = null, frameMO = null, frameAnim = null, frameCols = '', frameKey = '', toggleAt = -1e9
+    function frameState(f) { return f.getAttribute('data-sidebar-collapsed') + '|' + f.getAttribute('data-rightbar-collapsed') }
+    function lowMotion() { return S.reduceMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches }
+    function watchFrame() {
+      var f = q('[data-slot=root] > ' + C('frame'))
+      if (!f || f === frameEl) return
+      if (frameMO) frameMO.disconnect()
+      frameEl = f; frameAnim = null
+      frameCols = getComputedStyle(f).gridTemplateColumns; frameKey = frameState(f)
+      frameMO = new MutationObserver(onFrameMutate)
+      frameMO.observe(f, { attributes: true, attributeFilter: ['style', 'data-sidebar-collapsed', 'data-rightbar-collapsed'] })
+    }
+    /* logo 在覆盖层里，不在侧栏列里：折叠期间逐帧按侧栏右边缘算出要裁掉的宽度（换算回缩放前的本地坐标） */
+    var brandRaf = 0
+    function clipBrand() {
+      cancelAnimationFrame(brandRaf); brandRaf = 0
+      var brand = chrome && chrome.querySelector('.hos-brand'), col = q('[data-slot=root] ' + C('sidebarCol'))
+      if (!brand || !col) return
+      var r = brand.getBoundingClientRect(), w = brand.offsetWidth, edge = col.getBoundingClientRect().right
+      var cut = r.width ? Math.min(w, Math.max(0, (r.right - edge) * w / r.width)) : 0
+      document.body.style.setProperty('--hos-brand-clip', cut.toFixed(1) + 'px')
+      if (frameAnim) brandRaf = requestAnimationFrame(clipBrand)
+    }
+    function onFrameMutate() {
+      var f = frameEl, key = frameState(f)
+      if (key !== frameKey) { frameKey = key; toggleAt = performance.now() }
+      /* 上一段还在播时，起点取当下的动画值 */
+      var from = frameAnim ? getComputedStyle(f).gridTemplateColumns : frameCols
+      if (frameAnim) { frameAnim.onfinish = null; frameAnim.cancel(); frameAnim = null }
+      var to = getComputedStyle(f).gridTemplateColumns
+      frameCols = to
+      if (to === from || performance.now() - toggleAt > 300 || lowMotion()) return
+      var a = frameAnim = f.animate([{ gridTemplateColumns: from }, { gridTemplateColumns: to }], { duration: FOLD_MS, easing: FOLD_EASE })
+      clipBrand()
+      a.onfinish = function () {
+        if (frameAnim !== a) return
+        frameAnim = null
+        clipBrand()
+        /* DSH 等这条过渡结束才撤掉 data-animating */
+        f.dispatchEvent(new TransitionEvent('transitionend', { bubbles: true, propertyName: 'grid-template-columns' }))
       }
     }
 
@@ -717,6 +770,9 @@ window.__ModuleLoader__.load({
       if (raf) cancelAnimationFrame(raf); raf = 0
       if (bodyMO) bodyMO.disconnect(); bodyMO = null
       if (splashMO) splashMO.disconnect(); splashMO = null; splashRoot = null
+      if (frameMO) frameMO.disconnect(); frameMO = null; frameEl = null
+      if (frameAnim) frameAnim.cancel(); frameAnim = null
+      cancelAnimationFrame(brandRaf); brandRaf = 0
       window.removeEventListener('resize', syncSide)
       window.removeEventListener('dsh-startup:handoff', onHandoff)
       window.removeEventListener('dsh-startup:done', onDone)
@@ -725,7 +781,7 @@ window.__ModuleLoader__.load({
       document.querySelectorAll('.hos-sys,.hos-hero-en,.hos-hero-rule,.hos-reticle,.hos-trace,.hos-guide-ret').forEach(function (n) { n.remove() })
       tracePaths = []
       ;['data-hos', 'data-hos-chassis', 'data-hos-motion', 'data-hos-phase'].forEach(function (a) { document.body.removeAttribute(a) })
-      ;['--hos-logo-pad', '--hos-logo-h', '--hos-cut', '--hos-seat-x', '--hos-seat-y'].forEach(function (v) { document.body.style.removeProperty(v) })
+      ;['--hos-logo-pad', '--hos-logo-h', '--hos-cut', '--hos-seat-x', '--hos-seat-y', '--hos-brand-clip'].forEach(function (v) { document.body.style.removeProperty(v) })
     }
     function update(next) {
       S = next
