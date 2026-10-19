@@ -21,6 +21,7 @@
 |---|---|---|
 | `lib/splash.js` | 揭幕（`dsu-handoff`）那一刻派发 `window` 事件 `dsh-startup:handoff` | 上游只在完全淡出后派发 `dsh-startup:done`，晚了约 900ms；主界面要在镜头后撤的同一刻开始装配 |
 | `package.json` | 版本号、仓库地址、contributors | 标明 fork 来源 |
+| `lib/client.js` | 兜底版本常量 `FALLBACK_VERSION` 改成 `1.6.0-hos.1` | 与 package.json 保持一致（上游有测试防两处漂移） |
 | `FORK.md` | 新增 | 本文件 |
 
 其余文件与上游一致。上游的 352 项冒烟测试在本 fork 上全部通过（`npm test`）。
