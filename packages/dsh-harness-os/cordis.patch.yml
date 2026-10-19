@@ -1,0 +1,5 @@
+# dsh-harness-os — DSH bundle patch：把插件挂进 profile 的配置树。
+# 浏览器半边由 package.json 的 dsh.client 声明，宿主按它组装 client bundle。
+- insert:
+    - id: dsh-harness-os
+      name: dsh-harness-os

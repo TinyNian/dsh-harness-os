@@ -1,0 +1,2432 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harness OS · demo</title>
+<link rel="stylesheet" href="../packages/dsh-startup-screen/lib/splash.css">
+<style>
+/* ============================================================================
+ * Harness OS — DSH 主界面皮肤 demo
+ * 底板 / 机框 / 品牌块 / 阶段格 / 页脚 与 dsh-startup-screen 1.6 终幕同坐标、
+ * 同 token。揭幕时这些元素原地不动，其余部件按启动页的入场节奏装配。
+ * ========================================================================== */
+:root {
+  --bg: #dedbd4;
+  --bg-2: #f2efe8;
+  --ink: #0b0c0d;
+  --ink-soft: #34383a;
+  --muted: #6c6f6c;
+  --hair: rgba(20, 25, 28, 0.18);
+  --hair-soft: rgba(20, 25, 28, 0.07);
+  --accent: #ff7500;
+  --accent-ink: #b84f00;
+  --accent-2: #2c7a8a;
+  --glitch-a: #ff3b30;
+  --glitch-b: #2971b8;
+  --box-bg: #0b0c0d;
+  --box-ink: #f6f4ef;
+  --glass: rgba(255, 252, 246, 0.58);
+  --glass-hi: rgba(255, 255, 255, 0.72);
+  --shadow: 0 24px 60px rgba(56, 46, 34, 0.14);
+  --halo: var(--bg-2);
+
+  --din: "Bahnschrift", "DIN Alternate", "DIN Condensed", "Archivo", "Oswald", "Arial Narrow",
+    "Roboto Condensed", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --mono: "Cascadia Mono", "SFMono-Regular", "Consolas", "Menlo", "DejaVu Sans Mono", ui-monospace, monospace;
+  --zh: "Noto Sans SC", "Source Han Sans SC", "HarmonyOS Sans SC", "PingFang SC",
+    "Microsoft YaHei UI", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+
+  --ease: cubic-bezier(0.16, 0.84, 0.24, 1);
+  --frame: 26px;
+  --pad: 46px;
+  --side-w: 344px;
+  --rail-w: 286px;
+
+  --brush: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.82 0.014' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncR type='linear' slope='0.10' intercept='0.45'/><feFuncG type='linear' slope='0.10' intercept='0.45'/><feFuncB type='linear' slope='0.10' intercept='0.45'/><feFuncA type='linear' slope='0' intercept='1'/></feComponentTransfer></filter><rect width='420' height='420' filter='url(%23b)'/></svg>");
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #070a0e;
+  --bg-2: #0d131a;
+  --ink: #eef2f4;
+  --ink-soft: #b8c3ca;
+  --muted: #7d8c96;
+  --hair: rgba(180, 210, 225, 0.16);
+  --hair-soft: rgba(180, 210, 225, 0.055);
+  --accent-ink: #ff9a45;
+  --accent-2: #6fd3e8;
+  --box-bg: #eef2f4;
+  --box-ink: #070a0e;
+  --glass: rgba(8, 15, 20, 0.56);
+  --glass-hi: rgba(255, 255, 255, 0.055);
+  --shadow: 0 30px 80px rgba(0, 0, 0, 0.34);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--zh);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+svg.i { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ── 底板：与 .dsu-plate 同配方 ───────────────────────────────────────── */
+.hos-plate {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    var(--brush),
+    radial-gradient(120% 90% at 78% 12%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(168deg, var(--bg-2) 0%, var(--bg) 42%, var(--bg) 100%);
+  background-size: 420px 420px, auto, auto;
+  background-blend-mode: overlay, normal, normal;
+}
+:root[data-theme="dark"] .hos-plate {
+  background:
+    var(--brush),
+    radial-gradient(90% 70% at 50% 46%, rgba(40, 70, 86, 0.32) 0%, rgba(0, 0, 0, 0) 62%),
+    linear-gradient(168deg, var(--bg-2) 0%, var(--bg) 46%, #05070a 100%);
+  background-size: 420px 420px, auto, auto;
+  background-blend-mode: overlay, normal, normal;
+}
+/* 远景竖向档案柱：启动页 .dsu-wm 的那几根，留在主界面当景深 */
+.hos-wm { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.hos-wm i {
+  position: absolute; top: 2%; height: 96%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,255,255,0.38) 30%, rgba(255,255,255,0.14) 80%, rgba(255,255,255,0));
+  filter: blur(1.4px);
+}
+:root[data-theme="dark"] .hos-wm i { background: linear-gradient(180deg, rgba(120,170,190,0), rgba(120,170,190,0.05) 35%, rgba(120,170,190,0)); }
+.hos-wm i:nth-child(1) { left: 60%; width: 16%; opacity: .32; }
+.hos-wm i:nth-child(2) { left: 78%; width: 16%; opacity: .5; }
+
+/* ── 机框：与 .dsu-frame 同坐标 ──────────────────────────────────────── */
+.hos-frame { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.hos-frame::before {
+  content: ""; position: absolute; inset: var(--frame);
+  border: 1px solid var(--hair);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 0 rgba(0,0,0,0.3);
+}
+.hos-corner { position: absolute; width: 26px; height: 26px; }
+.hos-corner::before, .hos-corner::after { content: ""; position: absolute; background: var(--ink); opacity: .62; }
+.hos-corner::before { width: 100%; height: 1px; }
+.hos-corner::after { width: 1px; height: 100%; }
+.c-tl { left: var(--frame); top: var(--frame); } .c-tl::before, .c-tl::after { left: 0; top: 0; }
+.c-tr { right: var(--frame); top: var(--frame); } .c-tr::before, .c-tr::after { right: 0; top: 0; }
+.c-bl { left: var(--frame); bottom: var(--frame); } .c-bl::before, .c-bl::after { left: 0; bottom: 0; }
+.c-br { right: var(--frame); bottom: var(--frame); } .c-br::before, .c-br::after { right: 0; bottom: 0; }
+
+/* ── 入场：沿用启动页「左侧 -22px 滑入 / 右侧 +18px 滑入，60ms 一档」 ── */
+[data-in] {
+  opacity: 0;
+  transition: opacity 560ms var(--ease), transform 560ms var(--ease);
+  transition-delay: calc(var(--d, 0) * 60ms);
+}
+[data-in="l"] { transform: translateX(-22px); }
+[data-in="r"] { transform: translateX(18px); }
+[data-in="u"] { transform: translateY(14px); }
+[data-in="f"] { transform: none; }
+body.is-ready [data-in] { opacity: 1; transform: none; }
+
+/* ── 外壳 ───────────────────────────────────────────────────────────── */
+.hos-shell {
+  position: fixed; inset: var(--frame); z-index: 2;
+  display: grid;
+  grid-template-columns: var(--side-w) minmax(0, 1fr) var(--dock-w, 0px);
+}
+
+/* ── 侧栏 ───────────────────────────────────────────────────────────── */
+/* 揭幕时侧栏要宽到能放下启动页那行 REV 读数；读数收起后收窄到常规宽度 */
+.hos-shell { transition: grid-template-columns 680ms var(--ease); }
+body.is-docked { --side-w: 280px; }
+body.side-collapsed .hos-shell { grid-template-columns: 0px minmax(0, 1fr) var(--dock-w, 0px); }
+.hos-side {
+  position: relative;
+  display: flex; flex-direction: column;
+  min-height: 0; min-width: 0;
+  border-right: 1px solid var(--hair);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--glass) 70%, transparent), color-mix(in srgb, var(--glass) 30%, transparent));
+}
+body.side-collapsed .hos-side { visibility: hidden; overflow: hidden; border-right-color: transparent; }
+
+/* 品牌块与启动页 .dsu-brand 同位（视口 46/44 → 外壳内 20/18），装配完成后缩成 logo */
+.hos-brand {
+  position: absolute; left: 20px; top: 18px; z-index: 2;
+  font-family: var(--din); color: var(--ink); line-height: 1;
+  transform-origin: 0 0;
+  transition: transform 720ms var(--ease);
+}
+.hos-brand .b1 { font-size: 33px; font-weight: 700; letter-spacing: .012em; line-height: .98; }
+.hos-brand .b2 { font-size: 15px; font-weight: 700; letter-spacing: .012em; margin-top: 3px; }
+.hos-brand .b3 { font-size: 30px; font-weight: 400; line-height: 1.06; letter-spacing: .012em; display: flex; gap: 9px; align-items: baseline; }
+.hos-brand .b3 b { font-weight: 700; }
+body.is-docked .hos-brand { transform: scale(.56); }
+.side-toggle { position: absolute; right: 12px; top: 28px; z-index: 2; }
+
+/* 开机读数：只在揭幕那一刻接住启动页，随后收起 */
+.hos-boot { transition: opacity 360ms ease, transform 420ms var(--ease), visibility 0s linear 0s; }
+body.is-docked .hos-boot { opacity: 0; transform: translateX(-14px); visibility: hidden; transition: opacity 360ms ease, transform 420ms var(--ease), visibility 0s linear 420ms; }
+.hos-meta {
+  position: absolute; left: 20px; top: 144px;
+  display: flex; gap: 10px; align-items: baseline; white-space: nowrap;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .16em; color: var(--muted);
+}
+.hos-meta .clock { color: var(--accent); font-variant-numeric: tabular-nums; }
+.hos-slats { position: absolute; left: 20px; top: 170px; display: flex; gap: 5px; align-items: center; }
+.hos-slats i { width: 20px; height: 2px; background: var(--ink); opacity: .3; }
+.hos-slats i.on { width: 34px; background: var(--accent); opacity: 1; }
+
+.hos-side-body {
+  margin-top: 178px;
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  padding: 0 12px 0 20px;
+  transition: margin-top 680ms var(--ease);
+}
+body.is-docked .hos-side-body { margin-top: 82px; }
+
+/* 新会话：启动页 .dsu-btn 的擦入按钮 */
+.hos-btn {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid color-mix(in srgb, var(--ink) 72%, transparent);
+  background: color-mix(in srgb, var(--bg) 18%, transparent);
+  font-family: var(--zh); font-weight: 500; font-size: 14px; letter-spacing: .08em;
+  transition: color 220ms ease;
+}
+.hos-btn::before { content: ""; position: absolute; inset: 0; background: var(--ink); transform: translateX(-101%); transition: transform 300ms cubic-bezier(.2,.9,.2,1); }
+.hos-btn:hover::before, .hos-btn:focus-visible::before { transform: none; }
+.hos-btn:hover, .hos-btn:focus-visible { color: var(--box-ink); }
+.hos-btn > * { position: relative; z-index: 1; }
+.hos-btn:active { transform: translateY(1px); }
+
+.icon-btn { display: inline-grid; place-items: center; width: 26px; height: 26px; color: var(--ink-soft); transition: background-color 160ms, color 160ms; }
+.icon-btn:hover, .icon-btn[aria-pressed="true"] { background: var(--hair-soft); color: var(--ink); }
+
+/* 插件 / 插件市场 / 自动化任务 */
+.hos-nav { margin-top: 10px; display: flex; flex-direction: column; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 6px; font-size: 13.5px; color: var(--ink-soft); text-align: left;
+  transition: background-color 160ms, color 160ms;
+}
+.nav-item:hover { background: var(--hair-soft); color: var(--ink); }
+.nav-item .n { margin-left: auto; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; color: var(--muted); }
+
+.hos-sec-h {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; padding: 10px 0 4px 6px; border-top: 1px solid var(--hair);
+  font-size: 12px; letter-spacing: .12em; color: var(--muted);
+}
+.hos-sec-h .acts { display: flex; gap: 2px; }
+.hos-search {
+  display: none; align-items: center; gap: 8px;
+  margin: 2px 0 4px; padding: 6px 2px 6px 6px;
+  border-bottom: 1px solid var(--hair);
+  color: var(--muted);
+}
+.hos-search.open { display: flex; }
+.hos-search input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font: inherit; font-size: 12.5px; color: var(--ink); }
+.hos-search input::placeholder { color: var(--muted); }
+.hos-search input::-webkit-search-cancel-button { display: none; }
+
+.hos-tree { flex: 1; min-height: 0; overflow: auto; margin: 2px -6px 0 0; padding-right: 6px; scrollbar-width: thin; scrollbar-color: var(--hair) transparent; }
+.ws-row {
+  width: 100%; display: grid; grid-template-columns: 18px 1fr 12px; align-items: center; gap: 8px;
+  padding: 7px 6px; text-align: left; color: var(--ink-soft);
+  transition: background-color 160ms, color 160ms;
+}
+.ws-row:hover { background: var(--hair-soft); color: var(--ink); }
+.ws-name { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ws-chev { color: var(--muted); opacity: 0; transition: transform 240ms var(--ease), opacity 160ms; }
+.ws-row:hover .ws-chev, .ws.open .ws-chev { opacity: 1; }
+.ws.open .ws-chev { transform: rotate(90deg); }
+.ws-list { display: none; padding: 0 0 6px 26px; }
+.ws.open .ws-list { display: block; }
+.sess {
+  width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: baseline;
+  padding: 6px 8px; text-align: left; font-size: 13px; color: var(--ink-soft);
+  transition: background-color 160ms, color 160ms;
+}
+.sess span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sess time { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; color: var(--muted); }
+.sess:hover { background: var(--hair-soft); color: var(--ink); }
+/* 当前会话：启动页终幕「DEEPSEEK HARNESS」那块黑底白字 */
+.sess[aria-current="true"] { background: var(--box-bg); color: var(--box-ink); }
+.sess[aria-current="true"] time { color: color-mix(in srgb, var(--box-ink) 60%, transparent); }
+.sess.is-running time { color: var(--accent); }
+.tree-empty { padding: 10px 6px; font-size: 12.5px; color: var(--muted); }
+
+/* 账户行 + 菜单 */
+.hos-side-foot { position: relative; padding: 10px 12px 16px 14px; }
+.acct {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 7px 8px; text-align: left; font-size: 13px; color: var(--ink);
+  border: 1px solid transparent;
+  transition: background-color 160ms, border-color 160ms;
+}
+.acct:hover, .acct[aria-expanded="true"] { background: var(--hair-soft); border-color: var(--hair); }
+.acct .av { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--hair); color: var(--muted); }
+.acct .ph { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; }
+/* 首帧不播过渡（不放启动页时直接停在收起态） */
+body.instant *, body.instant *::before, body.instant *::after,
+html.no-motion *, html.no-motion *::before, html.no-motion *::after { transition: none !important; }
+html.no-motion .dpane.on, html.no-motion .tool, html.no-motion .set-body > .in, html.no-motion .toast, html.no-motion .approve { animation: none !important; }
+
+/* ── 中央列 ─────────────────────────────────────────────────────────── */
+.hos-center { position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.hos-top {
+  height: 58px; flex: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 0 28px; border-bottom: 1px solid transparent;
+  transition: border-color 400ms ease;
+}
+body[data-phase="active"] .hos-top { border-bottom-color: var(--hair); }
+.hos-top-t { min-width: 0; display: flex; align-items: baseline; gap: 14px; opacity: 0; transform: translateY(-6px); transition: opacity 420ms var(--ease), transform 420ms var(--ease); }
+body[data-phase="active"] .hos-top-t { opacity: 1; transform: none; }
+.hos-top-t h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hos-top-t .m { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; color: var(--muted); white-space: nowrap; }
+.hos-top-a { display: flex; gap: 2px; align-items: center; }
+.menu-btn { display: none; }
+body.side-collapsed .menu-btn { display: inline-grid; }
+
+.hos-stage { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/* hero：启动页中央读数的版式 —— 大字中文 + 等宽拉开的英文 + 发丝分隔 */
+.hos-hero {
+  position: absolute; inset: 0 0 auto 0; top: 4%; height: 58%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none;
+  transition: opacity 520ms var(--ease), transform 620ms var(--ease);
+}
+body[data-phase="active"] .hos-hero { opacity: 0; transform: translateY(-40px) scale(.96); }
+.hos-reticle {
+  position: absolute; left: 50%; top: 50%;
+  width: min(440px, 62vh, 70%); aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  color: var(--ink);
+  opacity: 0;
+}
+body.is-ready .hos-reticle { opacity: 1; }
+.hos-reticle.docking { transition: transform 1150ms cubic-bezier(.22,.8,.2,1), opacity 900ms ease; }
+.hos-reticle svg { width: 100%; height: 100%; overflow: visible; }
+.r-ring-a { fill: none; stroke: currentColor; stroke-width: 1.6; opacity: .62; }
+.r-ring-b { fill: none; stroke: currentColor; stroke-width: 1; opacity: .3; }
+.r-bracket { fill: none; stroke: currentColor; stroke-width: 1.2; opacity: .55; }
+.r-tick { stroke: currentColor; stroke-width: 1; opacity: .22; }
+.r-tick.major { opacity: .42; stroke-width: 1.4; }
+.r-data { stroke: var(--accent-2); stroke-width: 1.4; opacity: .25; }
+.r-data.lit { opacity: .85; }
+.r-dot-a { fill: currentColor; }
+.r-dot-o { fill: var(--accent); }
+.r-comet { fill: none; stroke: var(--accent-2); stroke-width: 2.2; stroke-linecap: round; opacity: .7; transform-origin: 200px 200px; animation: r-spin 7.5s linear infinite; }
+.r-rot-a { transform-origin: 200px 200px; animation: r-spin 90s linear infinite; }
+.r-rot-b { transform-origin: 200px 200px; animation: r-spin 60s linear infinite reverse; }
+@keyframes r-spin { to { transform: rotate(360deg); } }
+
+.hero-zh {
+  position: relative; z-index: 1;
+  font-family: var(--zh); font-weight: 500;
+  font-size: clamp(34px, 4.4vh, 50px); letter-spacing: .3em; text-indent: .3em;
+  color: var(--ink);
+  text-shadow: 0 0 14px var(--halo), 0 0 5px var(--halo);
+  white-space: nowrap;
+}
+.hero-en {
+  position: relative; z-index: 1; margin-top: 8px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .62em; text-indent: .62em;
+  color: var(--ink-soft);
+  text-shadow: 0 0 10px var(--halo);
+}
+.hero-rule { position: relative; z-index: 1; width: min(520px, 80%); height: 1px; margin-top: 10px; background: linear-gradient(90deg, transparent, var(--hair) 18%, var(--hair) 82%, transparent); }
+
+/* 对话流 */
+.hos-flow {
+  flex: 1; min-height: 0; overflow: auto;
+  padding: 28px 28px 24px;
+  scrollbar-width: thin; scrollbar-color: var(--hair) transparent;
+  display: none;
+}
+body[data-phase="active"] .hos-flow { display: block; }
+.flow-in { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
+
+.e-head {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .2em; color: var(--muted);
+}
+.e-head b { color: var(--ink); font-weight: 400; }
+.e-head .sep { width: 18px; height: 1px; background: var(--hair); }
+.e-user { align-self: flex-end; max-width: 78%; display: flex; flex-direction: column; align-items: flex-end; gap: 7px; }
+.e-user .bubble {
+  padding: 12px 16px;
+  background: var(--glass); border: 1px solid var(--hair);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  font-size: 14.5px; line-height: 1.75; color: var(--ink);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+}
+.e-ai { display: flex; flex-direction: column; gap: 12px; }
+.e-ai .e-head .mark { width: 7px; height: 7px; background: var(--ink); transform: rotate(45deg); }
+.e-ai.running .e-head .mark { background: var(--accent); animation: blink 1.1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+
+.think {
+  display: flex; flex-direction: column;
+}
+.think-t {
+  display: inline-flex; align-items: center; gap: 10px; align-self: flex-start;
+  font-size: 12.5px; color: var(--ink-soft); padding: 2px 0;
+}
+.think-t .en { font-family: var(--mono); font-size: 9.5px; letter-spacing: .26em; color: var(--muted); }
+.think-t svg { transition: transform 240ms var(--ease); color: var(--muted); }
+.think.open .think-t svg { transform: rotate(90deg); }
+.think-b { display: none; margin: 8px 0 0 5px; padding: 2px 0 2px 16px; border-left: 1px dashed var(--hair); font-size: 13px; line-height: 1.8; color: var(--muted); }
+.think.open .think-b { display: block; }
+
+.tools { display: flex; flex-direction: column; border-top: 1px solid var(--hair-soft); }
+.tool {
+  display: grid; grid-template-columns: 16px 62px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  padding: 8px 2px; border-bottom: 1px solid var(--hair-soft);
+  font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em;
+  animation: tool-in 420ms var(--ease) both;
+}
+@keyframes tool-in { from { opacity: 0; transform: translateX(-12px); } }
+.tool .st { width: 7px; height: 7px; border: 1px solid var(--muted); border-radius: 50%; justify-self: center; }
+.tool.done .st { background: var(--ink); border-color: var(--ink); border-radius: 0; transform: rotate(45deg); width: 6px; height: 6px; }
+.tool.run .st { border-color: var(--accent); background: var(--accent); animation: blink 1.1s steps(2) infinite; }
+.tool .vb { font-size: 10px; letter-spacing: .22em; color: var(--muted); }
+.tool .tg { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tool .rt { font-size: 10px; letter-spacing: .1em; color: var(--muted); white-space: nowrap; }
+.tool .rt .add { color: var(--accent-2); } .tool .rt .del { color: var(--glitch-a); }
+.tool.run .rt { color: var(--accent-ink); }
+
+.prose { font-size: 14.5px; line-height: 1.85; color: var(--ink); }
+.prose p { margin: 0 0 10px; }
+.prose ul { margin: 0 0 10px; padding-left: 0; list-style: none; }
+.prose li { position: relative; padding-left: 18px; margin: 4px 0; }
+.prose li::before { content: ""; position: absolute; left: 3px; top: .85em; width: 6px; height: 1px; background: var(--ink); }
+.prose code { font-family: var(--mono); font-size: 12px; padding: 1px 5px; background: var(--hair-soft); border: 1px solid var(--hair-soft); }
+.codeblock { margin: 4px 0 12px; border: 1px solid var(--hair); background: color-mix(in srgb, var(--glass) 80%, transparent); }
+.codeblock .ch { display: flex; justify-content: space-between; padding: 6px 12px; border-bottom: 1px solid var(--hair-soft); font-family: var(--mono); font-size: 9.5px; letter-spacing: .22em; color: var(--muted); }
+.codeblock pre { margin: 0; padding: 10px 12px; font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--ink-soft); overflow: auto; }
+.codeblock .k { color: var(--accent-ink); } .codeblock .s { color: var(--accent-2); } .codeblock .c { color: var(--muted); }
+.caret { display: inline-block; width: 8px; height: 1.05em; vertical-align: -2px; margin-left: 2px; background: var(--accent); animation: blink 1s steps(2) infinite; }
+
+.exec {
+  display: flex; align-items: center; gap: 12px; margin-top: 2px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--muted);
+}
+.exec .zh { font-family: var(--zh); letter-spacing: .3em; font-size: 12px; color: var(--ink-soft); }
+.exec svg { width: 22px; height: 22px; }
+.exec .ring { fill: none; stroke: var(--hair); stroke-width: 2; }
+.exec .arc { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; transform-origin: 12px 12px; animation: r-spin 1.2s linear infinite; }
+.exec .t { color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+
+/* 输入卡 */
+.hos-seat { position: relative; flex: none; padding: 0 28px 22px; }
+body[data-phase="hero"] .hos-seat { position: absolute; left: 0; right: 0; top: 62%; }
+.composer {
+  position: relative; max-width: 780px; margin: 0 auto;
+  border: 1px solid var(--hair);
+  background: linear-gradient(180deg, var(--glass-hi), transparent 48%), var(--glass);
+  -webkit-backdrop-filter: blur(15px) saturate(1.18); backdrop-filter: blur(15px) saturate(1.18);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  box-shadow: var(--shadow);
+  transition: border-color 220ms ease;
+}
+/* clip-path 切掉的角补一道发丝斜线，框才闭合 */
+.cut::before, .cut::after { content: ""; position: absolute; width: var(--cut, 16px); height: var(--cut, 16px); pointer-events: none;
+  background: linear-gradient(to top right, transparent calc(50% - 1px), var(--hair) calc(50% - 1px), var(--hair) calc(50% + .5px), transparent calc(50% + .5px)); }
+.cut::before { top: -1px; right: -1px; }
+.cut::after { bottom: -1px; left: -1px; }
+.cut.cut-tr::after { display: none; }
+.composer:focus-within { border-color: color-mix(in srgb, var(--ink) 45%, transparent); }
+.cmp-chips { display: flex; gap: 6px; padding: 10px 12px 0; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px;
+  border: 1px solid var(--hair-soft); background: var(--hair-soft);
+  font-size: 12px; color: var(--ink-soft);
+  transition: border-color 160ms, color 160ms;
+}
+.chip:hover { border-color: var(--hair); color: var(--ink); }
+.chip .en { font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; color: var(--muted); }
+.chip svg.i { width: 12px; height: 12px; }
+.cmp-in { display: block; width: 100%; min-height: 58px; max-height: 220px; padding: 10px 16px 4px; border: 0; background: none; outline: none; resize: none; font: inherit; font-size: 14.5px; line-height: 1.7; color: var(--ink); }
+.cmp-in::placeholder { color: var(--muted); }
+.cmp-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px 10px 10px; }
+.cmp-bar .l, .cmp-bar .r { display: flex; align-items: center; gap: 4px; }
+.model { display: inline-flex; align-items: baseline; gap: 8px; height: 30px; padding: 0 8px; align-items: center; font-family: var(--din); font-size: 13.5px; letter-spacing: .04em; color: var(--ink); transition: background-color 160ms; }
+.model:hover { background: var(--hair-soft); }
+.model .lv { font-family: var(--mono); font-size: 9.5px; letter-spacing: .22em; color: var(--accent-ink); }
+.send {
+  display: grid; place-items: center; width: 36px; height: 36px; margin-left: 4px;
+  background: var(--ink); color: var(--box-ink);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  transition: background-color 200ms, opacity 200ms;
+}
+.send:hover { background: var(--accent); color: #fff; }
+.send:disabled { opacity: .28; cursor: default; background: var(--ink); color: var(--box-ink); }
+.send.stop { background: var(--accent); color: #fff; opacity: 1; cursor: pointer; }
+.send svg.i { width: 16px; height: 16px; stroke-width: 2; }
+.cmp-note { max-width: 780px; margin: 8px auto 0; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9.5px; letter-spacing: .2em; color: var(--muted); }
+
+/* 信号轨迹：启动页底部那条，运行时振幅抬高 */
+.hos-trace { width: min(520px, 70%); height: 38px; margin: 18px auto 0; opacity: .74; pointer-events: none; }
+body[data-phase="active"] .hos-trace { display: none; }
+.hos-trace svg { width: 100%; height: 100%; overflow: visible; }
+.t-base { stroke: var(--hair); stroke-width: 1; } .t-tick { stroke: var(--hair); stroke-width: 1; opacity: .7; }
+.t-line { fill: none; stroke: var(--accent-2); stroke-width: 1.25; stroke-linejoin: round; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent-2) 50%, transparent)); }
+.t-cur { stroke: var(--accent); stroke-width: 1; animation: t-scan 4.6s linear infinite; }
+@keyframes t-scan { from { transform: translateX(0); } to { transform: translateX(520px); } }
+
+/* ── 右侧栏：DSH 的停靠列。不是浮起的卡片，是机框里的一列；顶边就是 tab 条 ── */
+.hos-dock {
+  position: relative; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column;
+  border-left: 1px solid var(--hair);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--glass) 55%, transparent), color-mix(in srgb, var(--glass) 22%, transparent));
+  overflow: hidden;
+  transition: visibility 0s linear 0s;
+}
+body:not(.dock-open) .hos-dock { visibility: hidden; border-left-color: transparent; transition: visibility 0s linear 680ms; }
+.dock-in { position: absolute; inset: 0 auto 0 0; width: var(--dock-open-w); display: flex; flex-direction: column; }
+.dock-strip {
+  height: 58px; flex: none;
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 10px 0 12px; border-bottom: 1px solid var(--hair);
+}
+.dtabs { display: flex; gap: 4px; min-width: 0; overflow: hidden; }
+.dtab {
+  display: inline-flex; align-items: center; gap: 7px; height: 28px; max-width: 168px; flex: none;
+  padding: 0 4px 0 9px; font-size: 12.5px; color: var(--ink-soft);
+  border: 1px solid var(--hair-soft);
+  transition: background-color 160ms, color 160ms, border-color 160ms;
+}
+.dtab:hover { border-color: var(--hair); color: var(--ink); }
+.dtab .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dtab svg.i { width: 13px; height: 13px; }
+.dtab .x { display: inline-grid; place-items: center; width: 18px; height: 18px; color: inherit; opacity: 0; }
+.dtab:hover .x, .dtab.on .x { opacity: .7; }
+.dtab .x:hover { opacity: 1; background: color-mix(in srgb, currentColor 14%, transparent); }
+.dtab.on { background: var(--box-bg); color: var(--box-ink); border-color: var(--box-bg); }
+.dtab.quiet .x { display: none; }
+.dtab.quiet { padding-right: 9px; }
+.dock-strip .sp { flex: 1; }
+.dock-body { position: relative; flex: 1; min-height: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--hair) transparent; }
+.dpane { display: none; min-height: 100%; }
+.dpane.on { display: block; animation: pane-in 260ms var(--ease) both; }
+@keyframes pane-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* 引导页：DSH 的「弱化罗盘 + 入口胶囊」，罗盘就是启动页的准星 */
+.guide { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 40px 24px; }
+.guide-compass { width: 132px; aspect-ratio: 1; color: var(--ink); opacity: .55; }
+.guide-compass svg { width: 100%; height: 100%; overflow: visible; }
+.g-list { width: min(320px, 100%); display: flex; flex-direction: column; gap: 8px; }
+.g-entry {
+  position: relative; overflow: hidden;
+  display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; align-items: center;
+  padding: 12px 14px; text-align: left;
+  border: 1px solid var(--hair); background: color-mix(in srgb, var(--glass) 70%, transparent);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  transition: color 220ms ease, border-color 220ms;
+}
+.g-entry::before { content: ""; position: absolute; inset: 0; background: var(--ink); transform: translateX(-101%); transition: transform 300ms cubic-bezier(.2,.9,.2,1); }
+.g-entry:hover::before, .g-entry:focus-visible::before { transform: none; }
+.g-entry:hover, .g-entry:focus-visible { color: var(--box-ink); border-color: var(--ink); }
+.g-entry > * { position: relative; z-index: 1; }
+.g-entry b { display: block; font-weight: 500; font-size: 13.5px; }
+.g-entry small { display: block; font-size: 11.5px; color: var(--muted); transition: color 220ms; }
+.g-entry:hover small, .g-entry:focus-visible small { color: color-mix(in srgb, var(--box-ink) 62%, transparent); }
+.g-entry kbd { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--muted); }
+.g-entry:hover kbd { color: inherit; opacity: .7; }
+
+/* 页头行（文件树 / 对比 / 终端共用） */
+.p-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 10px 6px 14px; border-bottom: 1px solid var(--hair-soft); background: color-mix(in srgb, var(--bg-2) 88%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.p-head .grow { flex: 1; min-width: 0; }
+.path { font-family: var(--mono); font-size: 11.5px; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; text-align: left; }
+.path span { direction: ltr; unicode-bidi: isolate; }
+.path .dim { color: var(--muted); } .path .cur { color: var(--ink); }
+.seg { display: inline-flex; border: 1px solid var(--hair); }
+.seg button { height: 24px; padding: 0 8px; font-size: 11.5px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--hair-soft); color: var(--ink); }
+
+/* 文件树 */
+.ftree { padding: 6px 6px 18px; }
+.frow { width: 100%; display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px 0 calc(8px + var(--lv, 0) * 14px); text-align: left; font-size: 13px; color: var(--ink-soft); transition: background-color 140ms, color 140ms; }
+.frow:hover { background: var(--hair-soft); color: var(--ink); }
+.frow svg.i { width: 13px; height: 13px; color: var(--muted); }
+.frow .chev { transition: transform 200ms var(--ease); }
+.frow.open .chev { transform: rotate(90deg); }
+.frow .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.frow .st { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; }
+.frow .st.m { color: var(--accent-ink); } .frow .st.a { color: var(--accent-2); }
+.frow .pad { width: 13px; flex: none; }
+
+/* 变更对比 */
+.rv-pick { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; min-width: 0; height: 28px; padding: 0 6px; transition: background-color 140ms; }
+.rv-pick:hover { background: var(--hair-soft); }
+.rv-pick .path { max-width: 220px; }
+.num { font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em; white-space: nowrap; }
+.num .add { color: var(--accent-2); } .num .del { color: var(--glitch-a); }
+.diff { font-family: var(--mono); font-size: 11.5px; line-height: 1.75; padding: 8px 0 24px; }
+.diff .hk { padding: 6px 14px 4px; color: var(--muted); font-size: 10.5px; letter-spacing: .06em; }
+.dl { display: grid; grid-template-columns: 38px 38px 14px minmax(0, 1fr); }
+.dl .ln { padding-right: 8px; text-align: right; color: var(--muted); opacity: .7; user-select: none; }
+.dl .sg { color: var(--muted); user-select: none; }
+.dl code { font-family: inherit; white-space: pre; overflow: hidden; text-overflow: ellipsis; color: var(--ink-soft); padding-right: 12px; }
+.diff.wrap .dl code { white-space: pre-wrap; word-break: break-all; }
+.dl.add { background: color-mix(in srgb, var(--accent-2) 10%, transparent); } .dl.add .sg { color: var(--accent-2); }
+.dl.del { background: color-mix(in srgb, var(--glitch-a) 9%, transparent); } .dl.del .sg { color: var(--glitch-a); }
+.split { display: grid; grid-template-columns: 1fr 1fr; }
+.split > div + div { border-left: 1px solid var(--hair-soft); }
+.split .dl { grid-template-columns: 34px 12px minmax(0, 1fr); }
+.split .dl.pad { background: repeating-linear-gradient(135deg, transparent 0 5px, var(--hair-soft) 5px 6px); }
+.rv-note { padding: 10px 14px 0; font-size: 12px; color: var(--muted); }
+
+/* 终端 */
+.term { padding: 12px 16px 24px; font-family: var(--mono); font-size: 12px; line-height: 1.75; color: var(--ink-soft); white-space: pre-wrap; }
+.term .pr { color: var(--accent-ink); } .term .ok { color: var(--accent-2); } .term .mu { color: var(--muted); }
+
+/* 浏览器 */
+.urlbar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px; border: 1px solid var(--hair); font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); }
+.urlbar input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font: inherit; color: var(--ink); }
+.b-empty { padding: 60px 24px; text-align: center; font-size: 12.5px; color: var(--muted); }
+.f-empty { padding: 60px 24px; text-align: center; font-size: 12.5px; color: var(--muted); }
+.prev { padding: 12px 16px 24px; font-family: var(--mono); font-size: 12px; line-height: 1.75; color: var(--ink-soft); white-space: pre-wrap; }
+
+/* ── 输入框上方的上下文堆栈：Todo（DSH 的顺序是 Todo → Goal → Queue） ── */
+.cmp-stack { max-width: 780px; margin: 0 auto; padding: 0 18px; display: none; }
+body[data-phase="active"] .cmp-stack.has { display: block; }
+.todo-card {
+  border: 1px solid var(--hair); border-bottom: 0;
+  background: linear-gradient(180deg, var(--glass-hi), transparent 70%), var(--glass);
+  -webkit-backdrop-filter: blur(15px); backdrop-filter: blur(15px);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+.todo-h { width: 100%; display: grid; grid-template-columns: 26px minmax(0, 1fr) auto 14px; gap: 6px; align-items: center; padding: 7px 12px; text-align: left; font-size: 12.5px; color: var(--ink); }
+.todo-h .bx, .todo .bx { font-family: var(--mono); font-size: 10px; color: var(--accent-ink); }
+.todo-h .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.todo-h .c { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; color: var(--muted); }
+.todo-h svg { color: var(--muted); transition: transform 220ms var(--ease); }
+.todo-card.open .todo-h svg { transform: rotate(180deg); }
+.todo-list { display: none; padding: 0 12px 8px; border-top: 1px solid var(--hair-soft); }
+.todo-card.open .todo-list { display: block; }
+.todo { display: grid; grid-template-columns: 26px 1fr; gap: 6px; padding: 4px 0; font-size: 12.5px; color: var(--ink-soft); }
+.todo .bx { color: var(--muted); }
+.todo.done { color: var(--muted); } .todo.done span { text-decoration: line-through; text-decoration-color: var(--hair); }
+.todo.doing { color: var(--ink); } .todo.doing .bx { color: var(--accent-ink); }
+
+/* 输入卡里的上下文读数：启动页那 6 格阶段条，缩小后读上下文占用 */
+.ctxm { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--muted); }
+.ctxm .bars { display: flex; gap: 2px; }
+.ctxm .bars i { width: 7px; height: 2px; background: var(--hair); }
+.ctxm .bars i.on { background: var(--ink); opacity: .6; }
+.ctxm .bars i.hi { background: var(--accent); opacity: 1; width: 11px; }
+
+/* 一轮结束时的改动文件卡片：点行在右侧栏打开对比 */
+.chg-card { position: relative; margin-top: 4px; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); border: 1px solid var(--hair); background: color-mix(in srgb, var(--glass) 75%, transparent); }
+.chg-h { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px; text-align: left; font-size: 13px; color: var(--ink); border-bottom: 1px solid var(--hair-soft); }
+.chg-h .num { margin-left: auto; }
+.chg-h .hint { margin-left: auto; display: none; font-size: 12px; color: var(--muted); }
+.chg-h:hover .num { display: none; } .chg-h:hover .hint { display: inline; }
+.chg-row { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 14px; text-align: left; transition: background-color 140ms; }
+.chg-row:hover { background: var(--hair-soft); }
+.chg-row .path { flex: 1; min-width: 0; font-family: var(--zh); font-size: 12.5px; }
+
+/* 侧栏底部的伪代码状态：原来右轨 SELF-CHECK 的读数，压成三行 */
+.sys { margin: 0 2px 8px 8px; padding-top: 10px; border-top: 1px dashed var(--hair); font-family: var(--mono); font-size: 10px; line-height: 1.75; letter-spacing: .04em; color: var(--muted); white-space: nowrap; overflow: hidden; }
+.sys .r { display: flex; gap: 8px; }
+.sys .k { color: var(--accent-ink); }
+.sys .clk { margin-left: auto; color: var(--accent); font-variant-numeric: tabular-nums; }
+.sys .v { color: var(--ink-soft); }
+.sys .dot { display: inline-block; width: 5px; height: 5px; margin-right: 6px; vertical-align: 1px; background: var(--accent-2); }
+.sys.busy .dot { background: var(--accent); animation: blink 1.1s steps(2) infinite; }
+.sys .cmd { overflow: hidden; text-overflow: ellipsis; }
+
+/* 全屏：覆盖机框内侧，底层列宽不变 */
+body.dock-full .hos-dock { position: fixed; inset: var(--frame); z-index: 30; visibility: visible; background: var(--bg-2); }
+body.dock-full .dock-in { width: 100%; }
+body.dock-open #dockToggle { display: none; }
+body.dock-open .hos-foot, body[data-phase="active"] .hos-foot { opacity: 0; }
+[hidden] { display: none !important; }
+.hos-foot { transition: opacity 300ms ease; }
+
+/* 页脚：与 .dsu-foot 同位 */
+.hos-foot {
+  position: fixed; right: var(--pad); bottom: 52px; z-index: 4;
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .2em; color: var(--ink);
+  pointer-events: none;
+}
+.hos-foot i { width: 26px; height: 7px; background: var(--ink); }
+
+/* 揭幕瞬间的一次扫描线，与启动页 .dsu-scanline 同配方 */
+.hos-scan { position: fixed; left: 0; right: 0; top: -14%; height: 96px; z-index: 5; pointer-events: none; opacity: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.035) 58%, rgba(0,0,0,.08) 86%, rgba(0,0,0,.12) 97%, rgba(0,0,0,0) 100%); }
+:root[data-theme="dark"] .hos-scan { background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.04) 58%, rgba(255,255,255,.09) 86%, rgba(255,255,255,.14) 97%, rgba(255,255,255,0) 100%); }
+.hos-scan.go { animation: scan 2200ms cubic-bezier(.42,0,.58,1) 1; }
+@keyframes scan { 0% { top: -14%; opacity: 0; } 10% { opacity: 1; } 86% { opacity: 1; } 100% { top: 102%; opacity: 0; } }
+
+/* ── demo 控制条（不属于皮肤）────────────────────────────────────────── */
+.demo-bar {
+  position: fixed; left: 50%; bottom: 6px; transform: translateX(-50%); z-index: 2147483600;
+  display: flex; align-items: center; gap: 2px; padding: 3px;
+  background: rgba(14, 15, 18, .86); color: #e9e9ec;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .16em;
+  border: 1px solid rgba(255,255,255,.12);
+}
+.demo-bar span { padding: 0 8px; color: #ff9a45; }
+.demo-bar button { padding: 4px 9px; color: #cfd0d6; }
+.demo-bar button:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── 响应式 ─────────────────────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  body.dock-open .hos-foot { display: none; }
+}
+@media (max-width: 760px) {
+  :root { --frame: 10px; }
+  .hos-shell, body[data-phase="hero"] .hos-shell { grid-template-columns: minmax(0, 1fr); }
+  body.dock-open { --dock-w: 0px; }
+  body.dock-open .hos-dock { position: fixed; inset: var(--frame); z-index: 30; visibility: visible; background: var(--bg-2); }
+  .dock-in { width: 100%; }
+  .cmp-stack { padding: 0 8px; }
+  .hos-side {
+    position: fixed; z-index: 20; left: var(--frame); top: var(--frame); bottom: var(--frame); width: min(300px, 86vw);
+    background: var(--bg-2); transform: translateX(-110%); visibility: hidden; overflow: hidden;
+    transition: transform 380ms var(--ease), visibility 0s linear 380ms;
+  }
+  body.side-open .hos-side { transform: none; visibility: visible; box-shadow: var(--shadow); transition: transform 380ms var(--ease); }
+  .hos-top-t { flex: 1; }
+  .hos-top-t .m { display: none; }
+  .menu-btn { display: inline-grid; }
+  .hos-top { padding: 0 12px; }
+  .hos-top-t { opacity: 1; transform: none; }
+  body[data-phase="hero"] .hos-top-t h1 { font-family: var(--din); font-weight: 700; letter-spacing: .06em; }
+  .hos-seat { padding: 0 12px 14px; }
+  body[data-phase="hero"] .hos-seat { top: auto; bottom: 0; }
+  .hos-hero { top: 0; height: 64%; }
+  .hero-zh { font-size: 28px; letter-spacing: .22em; text-indent: .22em; }
+  .hero-en { font-size: 9.5px; letter-spacing: .4em; text-indent: .4em; }
+  .hos-trace, .hos-foot, .cmp-note { display: none; }
+  .hos-flow { padding: 18px 12px; }
+  .e-user { max-width: 92%; }
+  .tool { grid-template-columns: 14px 48px minmax(0,1fr); }
+  .tool .rt { display: none; }
+  .demo-bar { bottom: auto; top: 0; white-space: nowrap; font-size: 9px; letter-spacing: .08em; }
+  .demo-bar button { padding: 2px 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; transition-delay: 0ms !important; }
+}
+/* ══ 统一浮层体系：弹出菜单 / 提示 / 轻提示 / 确认框 / 设置页 ═══════════════
+   全部沿用启动页的语言：发丝边、切角、深色反白块做「当前」，橙色只给状态。 */
+:root { --dock-open-w: clamp(340px, 40vw, 600px); }
+body.dock-open { --dock-w: var(--dock-open-w); }
+
+/* —— 拖动调宽 —— */
+.rz { position: absolute; top: 0; bottom: 0; z-index: 6; width: 9px; cursor: col-resize; touch-action: none; }
+.rz::after { content: ""; position: absolute; top: 0; bottom: 0; left: 4px; width: 1px; background: transparent; transition: background-color 160ms; }
+.rz:hover::after, .rz:focus-visible::after, body.resizing .rz.on::after { background: var(--accent); }
+.rz:focus-visible { outline: none; }
+.rz-l { right: -5px; }
+.rz-r { left: -4px; }
+body:not(.is-docked) .rz-l, body.side-collapsed .rz-l, body.dock-full .rz-r { display: none; }
+body.resizing { cursor: col-resize; user-select: none; }
+body.resizing .hos-shell, body.resizing .hos-side-body, body.resizing .hos-brand { transition: none !important; }
+body.resizing iframe { pointer-events: none; }
+
+/* —— 弹出菜单：外层投影，内层切角 —— */
+.pop { position: fixed; z-index: 2147483300; filter: drop-shadow(0 18px 40px rgba(20, 16, 10, .16)); opacity: 0; transform: translateY(4px); transition: opacity 140ms ease, transform 200ms var(--ease); pointer-events: none; }
+:root[data-theme="dark"] .pop { filter: drop-shadow(0 22px 48px rgba(0, 0, 0, .5)); }
+.pop.up { transform: translateY(-4px); }
+.pop.open { opacity: 1; transform: none; pointer-events: auto; }
+.pop-in {
+  min-width: 220px; max-width: 340px; max-height: min(460px, 70vh); overflow: auto; padding: 5px;
+  border: 1px solid var(--hair);
+  background: linear-gradient(180deg, var(--glass-hi), transparent 60%), color-mix(in srgb, var(--bg-2) 96%, transparent);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  clip-path: polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 0 100%);
+  scrollbar-width: thin; scrollbar-color: var(--hair) transparent;
+}
+.pop-h { display: flex; justify-content: space-between; gap: 12px; padding: 7px 10px 5px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .22em; color: var(--muted); }
+.pop-sep { height: 1px; margin: 4px 6px; background: var(--hair-soft); }
+.pop-item {
+  width: 100%; display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  padding: 7px 10px; text-align: left; font-size: 13px; color: var(--ink-soft);
+  transition: background-color 120ms, color 120ms;
+}
+.pop-item svg.i { width: 14px; height: 14px; color: var(--muted); }
+.pop-item:hover, .pop-item.kb { background: var(--hair-soft); color: var(--ink); }
+.pop-item:hover svg.i, .pop-item.kb svg.i { color: var(--ink); }
+.pop-item .tx { min-width: 0; }
+.pop-item .tx b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pop-item .tx small { display: block; margin-top: 1px; font-size: 11.5px; line-height: 1.5; color: var(--muted); white-space: normal; }
+.pop-item kbd, .pop-item .aux { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--muted); }
+.pop-item[aria-checked="true"] { color: var(--ink); }
+.pop-item[aria-checked="true"] .ck { color: var(--accent-ink); }
+.pop-item .ck { width: 14px; height: 14px; display: grid; place-items: center; }
+.pop-item[aria-disabled="true"] { opacity: .5; cursor: default; background: none; }
+.pop-item.danger, .pop-item.danger svg.i { color: var(--glitch-a); }
+.pop-search { display: flex; align-items: center; gap: 8px; margin: 2px 4px 4px; padding: 6px 6px; border-bottom: 1px solid var(--hair); color: var(--muted); }
+.pop-search input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font: inherit; font-size: 12.5px; color: var(--ink); }
+.pop-search input::-webkit-search-cancel-button { display: none; }
+.pop-empty { padding: 10px; font-size: 12px; color: var(--muted); }
+.pop-foot { padding: 6px 6px 4px; }
+.pop .seg { width: 100%; display: flex; }
+.pop .seg button { flex: 1; }
+
+/* —— 悬停提示：反白小块，和「当前会话」同一块黑 —— */
+.tip { position: fixed; z-index: 2147483400; display: flex; gap: 10px; align-items: center; padding: 4px 8px; background: var(--box-bg); color: var(--box-ink); font-size: 11.5px; white-space: nowrap; pointer-events: none; opacity: 0; transform: translateY(2px); transition: opacity 120ms ease, transform 160ms var(--ease); }
+.tip.on { opacity: 1; transform: none; }
+.tip kbd { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; opacity: .62; }
+
+/* —— 轻提示 —— */
+.toasts { position: fixed; left: 50%; bottom: 46px; z-index: 2147483450; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
+.toast { display: flex; align-items: center; gap: 14px; padding: 9px 12px 9px 14px; background: var(--box-bg); color: var(--box-ink); font-size: 12.5px; pointer-events: auto; animation: toast-in 260ms var(--ease) both; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%); }
+.toast .lb { font-family: var(--mono); font-size: 9.5px; letter-spacing: .22em; color: var(--accent); }
+.toast button { font-size: 12px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.toast.out { animation: toast-out 200ms ease forwards; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes toast-out { to { opacity: 0; transform: translateY(6px); } }
+
+/* —— 按钮 —— */
+.btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 32px; padding: 0 14px; border: 1px solid color-mix(in srgb, var(--ink) 40%, transparent); font-size: 13px; color: var(--ink); transition: color 200ms, border-color 200ms, opacity 200ms; }
+.btn::before { content: ""; position: absolute; inset: 0; background: var(--ink); transform: translateX(-101%); transition: transform 280ms cubic-bezier(.2,.9,.2,1); }
+.btn:hover::before, .btn:focus-visible::before { transform: none; }
+.btn:hover, .btn:focus-visible { color: var(--box-ink); border-color: var(--ink); }
+.btn > * { position: relative; z-index: 1; }
+.btn.primary { background: var(--ink); color: var(--box-ink); border-color: var(--ink); }
+.btn.primary::before { background: var(--accent); }
+.btn.primary:hover, .btn.primary:focus-visible { color: #fff; border-color: var(--accent); }
+.btn.danger { background: var(--glitch-a); color: #fff; border-color: var(--glitch-a); }
+.btn.danger::before { background: var(--ink); }
+.btn.ghost { border-color: transparent; color: var(--ink-soft); }
+.btn.sm { height: 26px; padding: 0 10px; font-size: 12px; }
+.btn:disabled { opacity: .4; pointer-events: none; }
+
+/* —— 模态层：确认框与设置页共用 —— */
+.modal { position: fixed; inset: 0; z-index: 2147483200; display: grid; place-items: center; padding: 24px; background: color-mix(in srgb, var(--bg) 52%, transparent); -webkit-backdrop-filter: blur(6px) saturate(.9); backdrop-filter: blur(6px) saturate(.9); opacity: 0; transition: opacity 200ms ease; }
+.modal.open { opacity: 1; }
+.plate {
+  position: relative;
+  border: 1px solid var(--hair);
+  background:
+    var(--brush),
+    linear-gradient(168deg, var(--bg-2) 0%, var(--bg) 60%);
+  background-size: 420px 420px, auto; background-blend-mode: overlay, normal;
+  box-shadow: 0 40px 120px rgba(30, 24, 16, .22);
+  transform: translateY(10px) scale(.985); transition: transform 320ms var(--ease);
+}
+:root[data-theme="dark"] .plate { box-shadow: 0 40px 120px rgba(0, 0, 0, .6); }
+.modal.open .plate { transform: none; }
+.plate .hos-corner { position: absolute; }
+.plate .c-tl { left: -1px; top: -1px; } .plate .c-tr { right: -1px; top: -1px; } .plate .c-bl { left: -1px; bottom: -1px; } .plate .c-br { right: -1px; bottom: -1px; }
+.dlg-plate { width: min(460px, 100%); }
+.dlg { padding: 22px 24px 18px; }
+.dlg-k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .26em; color: var(--accent-ink); }
+.dlg h2 { margin: 8px 0 0; font-size: 17px; font-weight: 600; letter-spacing: .04em; }
+.dlg p { margin: 10px 0 0; font-size: 13px; line-height: 1.8; color: var(--ink-soft); }
+.dlg-chk { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; font-size: 12.5px; color: var(--ink-soft); cursor: pointer; }
+.dlg-f { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+/* 方形复选 / 开关 / 单选 */
+.box { flex: none; width: 14px; height: 14px; margin-top: 2px; border: 1px solid color-mix(in srgb, var(--ink) 50%, transparent); display: grid; place-items: center; }
+.box::after { content: ""; width: 6px; height: 6px; background: var(--accent); transform: scale(0); transition: transform 160ms var(--ease); }
+[aria-checked="true"] > .box::after, input:checked + .box::after { transform: none; }
+.sw { position: relative; flex: none; width: 34px; height: 18px; border: 1px solid color-mix(in srgb, var(--ink) 45%, transparent); transition: background-color 180ms; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: color-mix(in srgb, var(--ink) 55%, transparent); transition: transform 220ms var(--ease), background-color 180ms; }
+.sw[aria-checked="true"] { background: var(--ink); border-color: var(--ink); }
+.sw[aria-checked="true"]::after { transform: translateX(16px); background: var(--accent); }
+
+/* —— 设置页 —— */
+.settings { width: min(1000px, 100%); height: min(700px, calc(100vh - 48px)); display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.set-top { display: flex; align-items: baseline; gap: 14px; padding: 20px 22px 16px 26px; border-bottom: 1px solid var(--hair); }
+.set-top h2 { white-space: nowrap; margin: 0; font-size: 20px; font-weight: 600; letter-spacing: .14em; }
+.set-top .en { font-family: var(--mono); font-size: 10px; letter-spacing: .4em; color: var(--muted); }
+.set-top .sp { flex: 1; }
+.set-top .ver { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; color: var(--muted); }
+.set-main { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 0; }
+.set-nav { min-height: 0; overflow: auto; padding: 12px 10px 16px 14px; border-right: 1px solid var(--hair); scrollbar-width: thin; }
+.set-nav .g { margin: 12px 0 4px 10px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .24em; color: var(--muted); }
+.set-nav .g:first-child { margin-top: 2px; }
+.set-nav button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 10px; text-align: left; font-size: 13px; color: var(--ink-soft); transition: background-color 140ms, color 140ms; }
+.set-nav button:hover { background: var(--hair-soft); color: var(--ink); }
+.set-nav button[aria-current="true"] { background: var(--box-bg); color: var(--box-ink); }
+.set-nav button svg.i { width: 14px; height: 14px; opacity: .8; }
+.set-nav .tag { margin-left: auto; font-family: var(--mono); font-size: 9px; letter-spacing: .14em; opacity: .6; }
+.set-body { min-height: 0; overflow: auto; padding: 22px 30px 40px; scrollbar-width: thin; scrollbar-color: var(--hair) transparent; }
+.set-body > .in { max-width: 640px; animation: pane-in 240ms var(--ease) both; }
+.set-h h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: .06em; }
+.set-h p { margin: 6px 0 0; font-size: 12.5px; line-height: 1.7; color: var(--muted); }
+.set-grp { margin-top: 22px; }
+.set-grp > .k { padding-bottom: 7px; border-bottom: 1px solid var(--hair); font-family: var(--mono); font-size: 9.5px; letter-spacing: .24em; color: var(--muted); }
+.set-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--hair-soft); }
+.set-row .l b { display: block; font-size: 13.5px; font-weight: 500; }
+.set-row .l small { display: block; margin-top: 3px; font-size: 12px; line-height: 1.65; color: var(--muted); }
+.set-row .l .ov { margin-left: 8px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; color: var(--accent-ink); }
+.set-row .r { display: flex; align-items: center; gap: 8px; }
+.fld { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 2px; border-bottom: 1px solid var(--hair); }
+.fld:focus-within { border-bottom-color: var(--ink); }
+.fld input { width: 120px; border: 0; background: none; outline: none; font-family: var(--mono); font-size: 12.5px; color: var(--ink); text-align: right; }
+.fld input.wide { width: 240px; text-align: left; }
+.fld .u { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.pick { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 8px 0 10px; border: 1px solid var(--hair); font-size: 12.5px; color: var(--ink); }
+.pick:hover { border-color: color-mix(in srgb, var(--ink) 40%, transparent); }
+.pick svg.i { width: 12px; height: 12px; color: var(--muted); }
+.swatches { display: flex; gap: 6px; }
+.swatches button { width: 22px; height: 22px; border: 1px solid var(--hair); display: grid; place-items: center; }
+.swatches button i { width: 12px; height: 12px; }
+.swatches button[aria-checked="true"] { border-color: var(--ink); }
+.chip-st { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; padding: 2px 6px; border: 1px solid currentColor; white-space: nowrap; }
+.chip-st.ok { color: var(--accent-2); } .chip-st.bad { color: var(--glitch-a); } .chip-st.mu { color: var(--muted); } .chip-st.on { color: var(--accent-ink); }
+.prov { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto auto; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--hair-soft); }
+.prov .ic { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--hair); font-family: var(--din); font-weight: 700; font-size: 13px; }
+.prov b { display: block; font-size: 13.5px; font-weight: 500; } .prov small { display: block; font-size: 12px; color: var(--muted); }
+.opt-cards { display: grid; gap: 8px; margin-top: 12px; }
+.opt-card { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 12px; padding: 12px 14px; text-align: left; border: 1px solid var(--hair); transition: border-color 160ms, background-color 160ms; }
+.opt-card:hover { border-color: color-mix(in srgb, var(--ink) 40%, transparent); }
+.opt-card[aria-checked="true"] { border-color: var(--ink); background: color-mix(in srgb, var(--glass) 70%, transparent); }
+.opt-card .box { border-radius: 50%; } .opt-card .box::after { border-radius: 50%; }
+.opt-card b { display: block; font-size: 13.5px; font-weight: 500; } .opt-card small { display: block; margin-top: 3px; font-size: 12px; line-height: 1.65; color: var(--muted); }
+.opt-card .exp { margin-left: 6px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; color: var(--accent-ink); }
+.plug { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--hair-soft); }
+.plug b { display: block; font-family: var(--mono); font-size: 12.5px; font-weight: 400; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plug small { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.set-search { display: flex; align-items: center; gap: 8px; margin-top: 18px; padding: 6px 2px; border-bottom: 1px solid var(--hair); color: var(--muted); }
+.set-search input { flex: 1; border: 0; background: none; outline: none; font: inherit; font-size: 13px; color: var(--ink); }
+.set-note { margin-top: 14px; font-size: 12px; color: var(--muted); }
+.set-actions { display: flex; gap: 8px; margin-top: 16px; }
+
+/* —— 对话流细节 —— */
+.tool { cursor: pointer; }
+.tool:hover { background: var(--hair-soft); }
+.tool .rt .go { display: none; }
+.tool-x { display: none; grid-column: 2 / -1; margin: 2px 0 6px; padding: 8px 10px; border-left: 1px dashed var(--hair); font-family: var(--mono); font-size: 11px; line-height: 1.7; color: var(--muted); white-space: pre-wrap; }
+.tool.open .tool-x { display: block; }
+.tool.open { background: var(--hair-soft); }
+.approve { border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--hair)); background: color-mix(in srgb, var(--accent) 6%, var(--glass)); padding: 12px 14px; animation: tool-in 420ms var(--ease) both; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%); }
+.approve .k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .24em; color: var(--accent-ink); }
+.approve b { display: block; margin-top: 4px; font-size: 13.5px; font-weight: 500; }
+.approve pre { margin: 8px 0 0; padding: 8px 10px; border: 1px solid var(--hair-soft); background: var(--hair-soft); font-family: var(--mono); font-size: 12px; color: var(--ink); white-space: pre-wrap; }
+.approve small { display: block; margin-top: 8px; font-size: 12px; color: var(--muted); }
+.approve .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.approve.done { border-color: var(--hair); background: none; padding: 8px 12px; clip-path: none; }
+.approve.done .res { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; color: var(--muted); }
+.msg-acts { display: flex; gap: 2px; margin-top: -4px; opacity: .55; transition: opacity 160ms; }
+.e-ai:hover .msg-acts, .msg-acts:focus-within { opacity: 1; }
+.msg-acts .icon-btn[aria-pressed="true"] { color: var(--accent-ink); }
+.codeblock { position: relative; }
+.codeblock .cp { position: absolute; top: 2px; right: 6px; opacity: 0; }
+.codeblock:hover .cp, .codeblock .cp:focus-visible { opacity: 1; }
+.codeblock:hover .ch span:last-child { visibility: hidden; }
+.jump { position: absolute; left: 50%; top: -38px; z-index: 3; transform: translate(-50%, 6px); display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; background: var(--box-bg); color: var(--box-ink); font-size: 12px; opacity: 0; pointer-events: none; transition: opacity 160ms, transform 200ms var(--ease); }
+.jump.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.sess { position: relative; }
+.sess .more { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; display: none; place-items: center; color: inherit; opacity: .7; }
+.sess:hover .more, .sess .more[aria-expanded="true"] { display: grid; }
+.sess:hover time { visibility: hidden; }
+.sess .more:hover { opacity: 1; background: color-mix(in srgb, currentColor 12%, transparent); }
+.sess input.ren { width: 100%; min-width: 0; border: 0; border-bottom: 1px solid var(--accent); background: none; outline: none; font: inherit; color: inherit; padding: 0; }
+.chip[aria-expanded="true"] { border-color: var(--hair); color: var(--ink); }
+.chip .warn { color: var(--glitch-a); }
+
+@media (max-width: 760px) {
+  .settings { height: calc(100vh - 20px); }
+  .set-top { padding: 14px 12px 12px 16px; }
+  .set-top .ver { display: none; }
+  .set-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .set-nav { display: flex; gap: 4px; overflow-x: auto; padding: 8px 10px; border-right: 0; border-bottom: 1px solid var(--hair); }
+  .set-nav .g { display: none; }
+  .set-nav button { width: auto; flex: none; white-space: nowrap; }
+  .set-body { padding: 18px 16px 30px; }
+  .set-row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .fld input.wide { width: 100%; }
+  .modal { padding: 10px; }
+  .rz { display: none; }
+}
+</style>
+</head>
+<body data-phase="hero">
+
+<div class="hos-plate" aria-hidden="true"></div>
+<div class="hos-wm" aria-hidden="true"><i></i><i></i></div>
+<div class="hos-frame" aria-hidden="true">
+  <i class="hos-corner c-tl"></i><i class="hos-corner c-tr"></i><i class="hos-corner c-bl"></i><i class="hos-corner c-br"></i>
+</div>
+<div class="hos-scan" aria-hidden="true"></div>
+
+<div class="hos-shell">
+  <!-- ── 侧栏 ── -->
+  <aside class="hos-side" aria-label="工作区与会话">
+    <div class="rz rz-l" id="rzL" role="separator" aria-orientation="vertical" aria-label="调整侧栏宽度" aria-valuemin="264" aria-valuemax="420" tabindex="0" data-tip="拖动调整宽度 · 双击恢复"></div>
+    <header class="hos-brand" aria-label="DeepSeek Harness OS">
+      <div class="b1">DEEPSEEK</div>
+      <div class="b2">SYNTHESIZE INTELLIGENCE</div>
+      <div class="b3"><b>HARNESS</b><span>OS</span></div>
+    </header>
+    <button class="icon-btn side-toggle" id="sideToggle" data-in="r" style="--d:3" aria-label="收起侧栏" data-kbd="⌘ B"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M9 4v16"/></svg></button>
+    <div class="hos-boot" aria-hidden="true">
+      <div class="hos-meta"><span>REV 0.2.1-rc.1 · DESKTOP PROFILE</span><span class="clock" id="clock">--:--:--</span></div>
+      <div class="hos-slats" id="slats"></div>
+    </div>
+
+    <div class="hos-side-body">
+      <button class="hos-btn" id="newSession" data-in="l" style="--d:1">
+        <svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>新会话</span>
+      </button>
+
+      <nav class="hos-nav" data-in="l" style="--d:2" aria-label="扩展">
+        <button class="nav-item" data-nav="plugins"><svg class="i" viewBox="0 0 24 24"><path d="M9 3h6v4a2 2 0 1 0 4 0h2v6h-4a2 2 0 1 0 0 4h4v4h-6v-2a2 2 0 1 0-4 0v2H3v-6h2a2 2 0 1 0 0-4H3V7h6z"/></svg>插件<span class="n">12</span></button>
+        <button class="nav-item" data-nav="market"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg>插件市场</button>
+        <button class="nav-item" data-nav="auto"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>自动化任务<span class="n">2</span></button>
+      </nav>
+
+      <div class="hos-sec-h" data-in="l" style="--d:3">
+        <span>工作区</span>
+        <span class="acts">
+          <button class="icon-btn" id="searchBtn" aria-label="搜索会话" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
+          <button class="icon-btn" id="btnFilter" aria-label="筛选与排序" aria-haspopup="menu"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+          <button class="icon-btn" id="btnAddWs" aria-label="添加工作区"><svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5M9.5 13.5h5"/></svg></button>
+        </span>
+      </div>
+      <label class="hos-search" id="search">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+        <input type="search" id="searchInput" placeholder="搜索名称、关键词…" aria-label="搜索会话">
+      </label>
+      <div class="hos-tree" id="tree" data-in="l" style="--d:4"></div>
+    </div>
+
+    <div class="hos-side-foot" id="sideFoot" data-in="l" style="--d:5">
+      <div class="sys" id="sys" aria-label="系统状态">
+        <div class="r"><span class="k">$</span><span>harness status</span><span class="clk" id="sysClock">--:--:--</span></div>
+        <div class="r v"><span id="sysCfg">desktop · workspace-write · 12 bundles</span></div>
+        <div class="r v"><span class="cmd" id="sysState"><i class="dot"></i>ready</span></div>
+      </div>
+      <button class="acct" id="acct" aria-haspopup="menu" aria-expanded="false">
+        <span class="av"><svg class="i" viewBox="0 0 24 24" style="width:14px;height:14px"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 4-5.5 7-5.5s5.8 1.9 7 5.5"/></svg></span>
+        <span class="ph">138****0000</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── 中央 ── -->
+  <main class="hos-center">
+    <header class="hos-top">
+      <div style="display:flex;align-items:center;gap:6px;min-width:0">
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="打开侧栏"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <div class="hos-top-t">
+          <h1 id="sessTitle">新会话</h1>
+          <span class="m" id="sessMeta">SESSION 0043 · dsh-startup-screen</span>
+        </div>
+      </div>
+      <div class="hos-top-a" data-in="r" style="--d:2">
+        <button class="icon-btn" id="dockToggle" aria-label="展开右侧栏"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M15 4v16"/></svg></button>
+        <button class="icon-btn" id="btnMore" aria-label="更多" aria-haspopup="menu"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+      </div>
+    </header>
+
+    <div class="hos-stage">
+      <section class="hos-hero" aria-label="新会话">
+        <div class="hos-reticle" id="reticle" aria-hidden="true"></div>
+        <div class="hero-zh" data-in="f" style="--d:4">探索未至之境</div>
+        <div class="hero-en" data-in="f" style="--d:6">EXPLORE THE UNCHARTED</div>
+        <div class="hero-rule" data-in="f" style="--d:6"></div>
+      </section>
+
+      <section class="hos-flow" id="flow" aria-live="polite"><div class="flow-in" id="flowIn"></div></section>
+
+      <div class="hos-seat" id="seat" data-in="u" style="--d:7">
+        <button type="button" class="jump" id="jump"><svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M12 5v14M6 13l6 6 6-6"/></svg>回到最新</button>
+        <div class="cmp-stack" id="cmpStack">
+          <div class="todo-card" id="todoCard">
+            <button type="button" class="todo-h" id="todoHead" aria-expanded="false"><span class="bx">[/]</span><span class="t" id="todoNow"></span><span class="c" id="todoCount">0 / 5</span><svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="m6 15 6-6 6 6"/></svg></button>
+            <div class="todo-list" id="todos"></div>
+          </div>
+        </div>
+        <form class="composer cut" id="composer">
+          <div class="cmp-chips">
+            <button type="button" class="chip" id="chipWs" aria-haspopup="menu" aria-label="工作区"></button>
+            <button type="button" class="chip" id="chipPreset" aria-haspopup="menu" aria-label="Agent 预设"></button>
+            <button type="button" class="chip" id="chipPerm" aria-haspopup="menu" aria-label="权限"></button>
+            <span id="chipSkills" style="display:contents"></span>
+          </div>
+          <textarea class="cmp-in" id="input" rows="2" placeholder="描述你想要构建的内容" aria-label="输入指令"></textarea>
+          <div class="cmp-bar">
+            <div class="l">
+              <button type="button" class="icon-btn" id="btnAttach" aria-label="添加附件" aria-haspopup="menu"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+              <button type="button" class="icon-btn" id="btnSkill" aria-label="加载技能" aria-haspopup="menu"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg></button>
+            </div>
+            <div class="r">
+              <span class="ctxm" id="ctxm" title="上下文占用"><span class="bars" id="ctxBar"></span><span id="ctxPct">0%</span></span>
+              <button type="button" class="model" aria-haspopup="menu" aria-label="选择模型">DeepSeek-V4-Pro <span class="lv">MAX</span><svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="m6 9 6 6 6-6"/></svg></button>
+              <button type="submit" class="send" id="send" aria-label="发送" disabled><svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+            </div>
+          </div>
+        </form>
+        <div class="cmp-note"><span>ENTER 发送 · SHIFT+ENTER 换行</span><span id="cmpState">IDLE</span></div>
+        <div class="hos-trace" id="trace" aria-hidden="true"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── 右侧栏（停靠列） ── -->
+  <aside class="hos-dock" id="dock" aria-label="右侧栏">
+    <div class="rz rz-r" id="rzR" role="separator" aria-orientation="vertical" aria-label="调整右侧栏宽度" aria-valuemin="300" tabindex="0" data-tip="拖动调整宽度 · 双击恢复"></div>
+    <div class="dock-in">
+      <div class="dock-strip">
+        <div class="dtabs" id="dtabs" role="tablist"></div>
+        <button class="icon-btn" id="dAdd" aria-label="新标签页"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        <span class="sp"></span>
+        <button class="icon-btn" aria-label="分栏"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M12 4v16"/></svg></button>
+        <button class="icon-btn" id="dFull" aria-label="全屏"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        <button class="icon-btn" id="dClose" aria-label="收起右侧栏"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="M15 4v16"/></svg></button>
+      </div>
+      <div class="dock-body" id="dbody"></div>
+    </div>
+  </aside>
+</div>
+
+<footer class="hos-foot" aria-hidden="true"><span>POWERED BY DEEPSEEK</span><i></i></footer>
+
+<div class="demo-bar" role="toolbar" aria-label="demo 控制">
+  <span>DEMO</span>
+  <button id="dReplay">重播启动</button>
+  <button id="dTheme">切换主题</button>
+  <button id="dRun">演示对话</button>
+  <button id="dReset">回到空态</button>
+  <button id="dDock">右侧栏</button>
+</div>
+
+<script>
+/* ── 启动页配置：与插件 Host 注入的 window.__DSH_STARTUP__ 同结构 ── */
+(function () {
+  var qs = new URLSearchParams(location.search)
+  var theme = qs.get('theme') || (function () { try { return localStorage.getItem('hos-theme') } catch (e) { return null } })() || 'light'
+  document.documentElement.setAttribute('data-theme', theme)
+  window.__HOS_SPLASH__ = qs.get('splash') !== '0'
+  /* 截图用：关掉过渡，直接停在最终帧 */
+  if (qs.get('static') === '1') document.documentElement.classList.add('no-motion')
+  /* 与 Host 首屏兜底脚本同一个握手位：这次不播 */
+  if (!window.__HOS_SPLASH__) window.__DSH_STARTUP_SKIP__ = true
+  window.__DSH_STARTUP_SCRIPT_URL__ = '../packages/dsh-startup-screen/lib/splash.js'
+  var on = qs.get('sound') === '1'
+  window.__DSH_STARTUP__ = {
+    enabled: window.__HOS_SPLASH__, mode: 'always', theme: theme,
+    speed: Number(qs.get('speed')) || 1,
+    requireInteraction: qs.get('auto') !== '1', allowSkip: true,
+    sound: on, voice: on, bgm: false,
+    identity: 'JOYCE MOORE', identityId: '0087', accessLevel: '3',
+    facts: { version: '0.2.1-rc.1', profile: 'DESKTOP', model: 'deepseek-v4-pro', sandbox: 'workspace-write', bundleCount: 12, sessions: 42, hash: '7f3a91c2' }
+  }
+})()
+</script>
+<script src="../packages/dsh-startup-screen/lib/splash.js"></script>
+<script>
+(function () {
+  'use strict'
+  var $ = function (id) { return document.getElementById(id) }
+  var body = document.body
+  var NS = 'http://www.w3.org/2000/svg'
+  function svgEl(tag, attrs) { var n = document.createElementNS(NS, tag); for (var k in attrs) n.setAttribute(k, attrs[k]); return n }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] }) }
+
+  /* ── 时钟 ── */
+  function pad(n) { return (n < 10 ? '0' : '') + n }
+  function tick() {
+    var d = new Date()
+    $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+    $('sysClock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+  }
+  tick(); setInterval(tick, 1000)
+
+  /* ── 阶段格：停在启动页终幕的样子（6 格走完、末格点亮），装配后随开机读数收起 ── */
+  var slats = $('slats')
+  for (var i = 0; i < 6; i++) { var sl = document.createElement('i'); if (i === 5) sl.className = 'on'; slats.appendChild(sl) }
+  function setCtx(pct) {
+    var bar = $('ctxBar'), lit = Math.round(pct / 100 * 6); bar.innerHTML = ''
+    for (var j = 0; j < 6; j++) { var b = document.createElement('i'); if (j < lit) b.className = j === lit - 1 ? 'hi' : 'on'; bar.appendChild(b) }
+    $('ctxPct').textContent = pct + '%'
+    $('ctxm').title = '上下文占用 ' + pct + '%'
+  }
+  setCtx(0)
+
+  /* ── 准星：启动页 .dsu-reticle 的同一套几何，缩成 hero 尺寸 ── */
+  function makeReticle() {
+    var svg = svgEl('svg', { viewBox: '0 0 400 400' })
+    function arc(r, a0, a1, cls) {
+      var rad = function (d) { return (d - 90) * Math.PI / 180 }
+      var x0 = 200 + r * Math.cos(rad(a0)), y0 = 200 + r * Math.sin(rad(a0))
+      var x1 = 200 + r * Math.cos(rad(a1)), y1 = 200 + r * Math.sin(rad(a1))
+      var p = svgEl('path', { d: 'M' + x0.toFixed(2) + ' ' + y0.toFixed(2) + ' A' + r + ' ' + r + ' 0 ' + ((a1 - a0) > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(2) + ' ' + y1.toFixed(2), class: cls, 'stroke-linecap': 'round' })
+      return { node: p, x: x1, y: y1, x0: x0, y0: y0 }
+    }
+    var gA = svgEl('g', { class: 'r-rot-a' }); var a = arc(150, 215, 505, 'r-ring-a'); gA.appendChild(a.node)
+    gA.appendChild(svgEl('circle', { class: 'r-dot-a', cx: a.x.toFixed(2), cy: a.y.toFixed(2), r: 6 })); svg.appendChild(gA)
+    var gB = svgEl('g', { class: 'r-rot-b' }); var b = arc(104, 200, 490, 'r-ring-b'); gB.appendChild(b.node)
+    gB.appendChild(svgEl('circle', { class: 'r-dot-a', cx: b.x0.toFixed(2), cy: b.y0.toFixed(2), r: 3.5, opacity: .6 })); svg.appendChild(gB)
+    svg.appendChild(arc(62, 118, 242, 'r-bracket').node); svg.appendChild(arc(62, 298, 422, 'r-bracket').node)
+    ;[[152, 132], [252, 268], [278, 150]].forEach(function (p) { svg.appendChild(svgEl('circle', { class: 'r-dot-o', cx: p[0], cy: p[1], r: 2.8 })) })
+    for (var t = 0; t < 48; t++) {
+      var rd = ((t / 48) * 360 - 90) * Math.PI / 180, lg = t % 4 === 0, r1 = lg ? 143 : 138
+      svg.appendChild(svgEl('line', { class: 'r-tick' + (lg ? ' major' : ''), x1: (200 + 133 * Math.cos(rd)).toFixed(2), y1: (200 + 133 * Math.sin(rd)).toFixed(2), x2: (200 + r1 * Math.cos(rd)).toFixed(2), y2: (200 + r1 * Math.sin(rd)).toFixed(2) }))
+    }
+    /* 数据环：按 bundle 数点亮，和启动页一致 */
+    for (var d = 0; d < 40; d++) {
+      var rr = ((d / 40) * 360 - 90) * Math.PI / 180, lit = d < 12
+      svg.appendChild(svgEl('line', { class: 'r-data' + (lit ? ' lit' : ''), x1: (200 + 112 * Math.cos(rr)).toFixed(2), y1: (200 + 112 * Math.sin(rr)).toFixed(2), x2: (200 + (lit ? 120 : 116) * Math.cos(rr)).toFixed(2), y2: (200 + (lit ? 120 : 116) * Math.sin(rr)).toFixed(2) }))
+    }
+    svg.appendChild(svgEl('circle', { class: 'r-comet', cx: 200, cy: 200, r: 150, pathLength: 100, 'stroke-dasharray': '8 92' }))
+    return svg
+  }
+  $('reticle').appendChild(makeReticle())
+
+  /* ── 信号轨迹 ── */
+  var traceAmp = 1
+  ;(function trace() {
+    var svg = svgEl('svg', { viewBox: '0 0 520 46', preserveAspectRatio: 'none' })
+    svg.appendChild(svgEl('line', { x1: 0, y1: 23, x2: 520, y2: 23, class: 't-base' }))
+    for (var i = 0; i <= 20; i++) svg.appendChild(svgEl('line', { x1: i * 26, y1: 19, x2: i * 26, y2: 27, class: 't-tick' }))
+    var path = svgEl('path', { class: 't-line' }); svg.appendChild(path)
+    svg.appendChild(svgEl('line', { x1: 0, y1: 2, x2: 0, y2: 44, class: 't-cur' }))
+    $('trace').appendChild(svg)
+    var phase = 2.31
+    function draw() {
+      var drift = Date.now() * 0.00034, dd = 'M0 23'
+      for (var x = 0; x <= 520; x += 8) {
+        var env = Math.sin((x / 520) * Math.PI)
+        var amp = (Math.sin(x * 0.035 + phase + drift) * 5 + Math.sin(x * 0.011 + phase * 1.7 - drift * 0.62) * 3) * env * traceAmp
+        dd += ' L' + x + ' ' + (23 + amp).toFixed(1)
+      }
+      path.setAttribute('d', dd)
+    }
+    draw(); setInterval(draw, 90)
+  })()
+
+  /* 会话级状态：输入卡菜单、工作区排序都读这里 */
+  var STATE = { model: 'DeepSeek-V4-Pro', effort: 'Max', preset: '标准模式', perm: 'write', ws: 'dsh-startup-screen', sort: 'recent', onlyBusy: false, skills: [] }
+  /* ── 工作区树 ── */
+  var WS = [
+    { name: 'dsh-startup-screen', open: true, sessions: [
+      ['s43', '主界面皮肤：衔接启动动画', '刚刚'], ['s42', '1.6 光场背景重写', '3小时'],
+      ['s41', '浅色主题灯芯绒排查', '1天'], ['s40', '音频电平归一到 −22.6', '2天'], ['s39', '桌面端自举降级路径', '4天'] ] },
+    { name: 'playground', sessions: [['p1', '读一份 CSV 并出图', '2天'], ['p2', '整理下载文件夹', '5天']] },
+    { name: 'notes', sessions: [['f1', '本周笔记归档', '1天']] },
+    { name: '未分组', sessions: [] }
+  ]
+  var FOLDER = '<svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'
+  var CHEV = '<svg class="i ws-chev" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="m9 6 6 6-6 6"/></svg>'
+  var MORE = '<svg class="i" viewBox="0 0 24 24" style="width:13px;height:13px"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>'
+  var currentSess = 's43', runningSess = null, query = ''
+  function renderTree() {
+    var q = query.trim().toLowerCase(), html = '', hits = 0
+    var order = WS.map(function (w, wi) { return wi })
+    if (STATE.sort === 'name') order.sort(function (a, b) { return WS[a].name.localeCompare(WS[b].name, 'zh') })
+    order.forEach(function (wi) {
+      var w = WS[wi]
+      if (STATE.onlyBusy && !w.sessions.length) return
+      var list = w.sessions.filter(function (s) { return !q || s[1].toLowerCase().indexOf(q) !== -1 })
+      if (q && !list.length && w.name.toLowerCase().indexOf(q) === -1) return
+      hits++
+      var open = q ? true : w.open
+      html += '<div class="ws' + (open ? ' open' : '') + '" data-wi="' + wi + '">' +
+        '<button class="ws-row" aria-expanded="' + open + '">' + FOLDER + '<span class="ws-name">' + esc(w.name) + '</span>' + CHEV + '</button><div class="ws-list">'
+      list.forEach(function (s) {
+        var cur = s[0] === currentSess && body.dataset.phase === 'active'
+        html += '<button class="sess' + (s[0] === runningSess ? ' is-running' : '') + '" data-sid="' + s[0] + '"' + (cur ? ' aria-current="true"' : '') + '><span>' + esc(s[1]) + '</span><time>' + (s[0] === runningSess ? 'RUN' : s[2]) + '</time><span class="more" role="button" tabindex="-1" aria-label="会话操作" aria-haspopup="menu">' + MORE + '</span></button>'
+      })
+      if (!list.length) html += '<div class="tree-empty">还没有会话</div>'
+      html += '</div></div>'
+    })
+    $('tree').innerHTML = hits ? html : '<div class="tree-empty">没有匹配「' + esc(query.trim()) + '」的会话</div>'
+  }
+  $('tree').addEventListener('click', function (e) {
+    var row = e.target.closest('.ws-row')
+    if (row) { var w = WS[row.parentNode.dataset.wi]; w.open = !w.open; renderTree(); return }
+    var s = e.target.closest('.sess')
+    if (s && s.dataset.sid === 's43') { if (body.dataset.phase !== 'active') runDemo(); body.classList.remove('side-open') }
+  })
+  renderTree()
+
+  /* 搜索：图标按钮展开输入框，Esc 收起 */
+  function setSearch(on) {
+    $('search').classList.toggle('open', on)
+    $('searchBtn').setAttribute('aria-pressed', String(on))
+    if (on) $('searchInput').focus()
+    else { $('searchInput').value = ''; query = ''; renderTree() }
+  }
+  $('searchBtn').addEventListener('click', function () { setSearch(!$('search').classList.contains('open')) })
+  $('searchInput').addEventListener('input', function (e) { query = e.target.value; renderTree() })
+  $('searchInput').addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); setSearch(false) } })
+
+  /* 收起 / 展开侧栏：桌面收成 0 宽，窄屏是抽屉 */
+  function toggleSide() {
+    if (innerWidth <= 760) body.classList.toggle('side-open')
+    else body.classList.toggle('side-collapsed')
+  }
+  $('sideToggle').addEventListener('click', toggleSide)
+
+  /* ── 右侧栏 ─────────────────────────────────────────────────────────
+     与 DSH 的 sidebar-right 同构：每个会话一个停靠列，顶边是 tab 条；
+     空列打开引导页（罗盘 + 入口），入口有 文件 / 浏览器 / 终端；
+     改动文件卡片和文件树打开 变更对比 / 文件预览 页。 */
+  var ICON = {
+    guide: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>',
+    files: '<svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+    browser: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17"/></svg>',
+    terminal: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16"/><path d="m7 9 3 3-3 3M12 15h5"/></svg>',
+    review: '<svg class="i" viewBox="0 0 24 24"><path d="M8 4v10M3 9h10M12 19h9"/></svg>',
+    file: '<svg class="i" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>'
+  }
+  var X = '<svg class="i" viewBox="0 0 24 24" style="width:11px;height:11px"><path d="M6 6l12 12M18 6 6 18"/></svg>'
+  var GUIDE = [
+    { kind: 'files', title: '文件', desc: '浏览工作区目录', kbd: '⌘ P' },
+    { kind: 'browser', title: '浏览器', desc: '打开和浏览网页', kbd: '' },
+    { kind: 'terminal', title: '终端', desc: '交互式命令终端', kbd: '⌃ `' }
+  ]
+  var CHANGED = [
+    { path: 'skin/lib/skin.css', add: 248, del: 0, isNew: true,
+      hunks: [{ h: '@@ -0,0 +1,248 @@', lines: [
+        ['+', 0, 1, '/* Harness OS — DSH 主界面皮肤 */'],
+        ['+', 0, 2, 'body[data-dsh-harness-os] {'],
+        ['+', 0, 3, '  --hos-bg: #dedbd4;'],
+        ['+', 0, 4, '  --hos-ink: #0b0c0d;'],
+        ['+', 0, 5, '  --hos-accent: #ff7500;'],
+        ['+', 0, 6, '}'],
+        ['+', 0, 7, ''],
+        ['+', 0, 8, '/* 当前会话：终幕「DEEPSEEK HARNESS」的黑底白字 */'],
+        ['+', 0, 9, 'body[data-dsh-harness-os] [data-maid-session-row][aria-current] {'],
+        ['+', 0, 10, '  background: var(--hos-ink);'],
+        ['+', 0, 11, '  color: var(--hos-bg);'],
+        ['+', 0, 12, '}']] }] },
+    { path: 'skin/lib/client.js', add: 96, del: 4,
+      hunks: [{ h: '@@ -18,9 +18,14 @@ export function apply(ctx) {', lines: [
+        [' ', 18, 18, "  const root = document.body"],
+        [' ', 19, 19, "  root.setAttribute('data-dsh-harness-os', '')"],
+        ['-', 20, 0, "  window.addEventListener('load', assemble)"],
+        ['+', 0, 20, "  // 揭幕那一刻开始装配，和启动页淡出叠在一起"],
+        ['+', 0, 21, "  window.addEventListener('dsh-startup:done', assemble)"],
+        ['+', 0, 22, "  new MutationObserver(onHandoff)"],
+        ['+', 0, 23, "    .observe(document.body, { subtree: true, attributes: true })"],
+        [' ', 21, 24, ''],
+        ['-', 22, 0, "  setTimeout(dock, 0)"],
+        ['+', 0, 25, "  ctx.effect(() => () => root.removeAttribute('data-dsh-harness-os'))"],
+        [' ', 23, 26, '}']] }] }
+  ]
+  var TREE = [
+    { n: 'docs', d: 1, c: [{ n: 'findings.md' }, { n: 'optimization-1.6.md' }] },
+    { n: 'package', d: 1, c: [
+      { n: 'lib', d: 1, c: [{ n: 'client.js' }, { n: 'index.js' }, { n: 'splash.css' }, { n: 'splash.js' }] },
+      { n: 'test', d: 1, c: [{ n: 'smoke-host.mjs' }, { n: 'smoke-splash.mjs' }] },
+      { n: 'package.json' }] },
+    { n: 'skin', d: 1, open: true, c: [
+      { n: 'lib', d: 1, open: true, c: [{ n: 'client.js', st: 'M', p: 'skin/lib/client.js' }, { n: 'skin.css', st: 'A', p: 'skin/lib/skin.css' }] },
+      { n: 'package.json' }] },
+    { n: 'CHANGELOG.md' }, { n: 'README.md', p: 'README.md' }
+  ]
+  var PREVIEW = { 'README.md': '# dsh-startup-screen\n\nDeepSeek Harness 的开机启动动画插件：黑幕标识 → 过曝洗白 →\n暖白档案底板 → 五步访问授权 → 色散故障揭幕。\n\n## 安装\n\n  dsh plugin --profile desktop add ./dsh-startup-screen-1.6.0.tgz' }
+
+  var tabs = [], activeTab = null, tabSeq = 0, rvView = 'unified', rvWrap = false
+  function dockOpen() { return body.classList.contains('dock-open') }
+  function openDock() {
+    if (!tabs.length) addTab({ kind: 'guide' })
+    if (!dockOpen()) {
+      body.classList.add('dock-open')
+      /* 窗口不宽时，打开右侧栏会收起左侧栏（DSH 的规则） */
+      if (innerWidth < 1180 && innerWidth > 760) body.classList.add('side-collapsed')
+    }
+    renderDock()
+  }
+  function closeDock() { body.classList.remove('dock-open', 'dock-full') }
+  function tabTitle(t) {
+    return { guide: '新标签页', files: '文件', browser: '浏览器', terminal: '终端' }[t.kind] ||
+      (t.kind === 'review' ? '变更 · 第 1 轮' : t.file.split('/').pop())
+  }
+  function addTab(spec) {
+    var t = Object.assign({ id: 't' + (++tabSeq) }, spec); tabs.push(t); activeTab = t.id; return t
+  }
+  /* 单例页（文件 / 终端 / 浏览器 / 对比）重复打开时聚焦已有那一页；引导页被它打开的页替换 */
+  function openTab(spec) {
+    var cur = tabs.filter(function (t) { return t.id === activeTab })[0]
+    var same = tabs.filter(function (t) { return t.kind === spec.kind && (spec.kind !== 'preview' || t.file === spec.file) })[0]
+    if (same) { Object.assign(same, spec); activeTab = same.id }
+    else if (cur && cur.kind === 'guide' && spec.kind !== 'guide') { Object.assign(cur, spec) }
+    else addTab(spec)
+    openDock()
+  }
+  function closeTab(id) {
+    var i = tabs.findIndex(function (t) { return t.id === id })
+    if (i < 0) return
+    tabs.splice(i, 1)
+    if (!tabs.length) { closeDock(); return }
+    if (activeTab === id) activeTab = tabs[Math.max(0, i - 1)].id
+    renderDock()
+  }
+  function renderDock() {
+    $('dtabs').innerHTML = tabs.map(function (t) {
+      var quiet = tabs.length === 1 && t.kind === 'guide'
+      return '<div class="dtab' + (t.id === activeTab ? ' on' : '') + (quiet ? ' quiet' : '') + '" role="tab" tabindex="0" aria-selected="' + (t.id === activeTab) + '" data-id="' + t.id + '">' +
+        (ICON[t.kind] || ICON.file) + '<span class="t">' + esc(tabTitle(t)) + '</span>' +
+        (quiet ? '' : '<button class="x" aria-label="关闭标签页" data-close="' + t.id + '">' + X + '</button>') + '</div>'
+    }).join('')
+    $('dAdd').hidden = tabs.some(function (t) { return t.kind === 'guide' })
+    var t = tabs.filter(function (x) { return x.id === activeTab })[0]
+    $('dbody').innerHTML = t ? '<div class="dpane on">' + paneHtml(t) + '</div>' : ''
+    $('dbody').scrollTop = 0
+    if (t && t.kind === 'guide') $('guideCompass').appendChild(makeReticle(true))
+  }
+  function pathHtml(p) {
+    var parts = p.split('/'), last = parts.pop()
+    return '<span class="path"><span><span class="dim">' + (parts.length ? esc(parts.join('/')) + '/' : '') + '</span><span class="cur">' + esc(last) + '</span></span></span>'
+  }
+  function paneHtml(t) {
+    if (t.kind === 'guide') {
+      return '<div class="guide"><div class="guide-compass" id="guideCompass" aria-hidden="true"></div><div class="g-list">' +
+        GUIDE.map(function (g) { return '<button class="g-entry" data-open="' + g.kind + '">' + ICON[g.kind] + '<span><b>' + g.title + '</b><small>' + g.desc + '</small></span><kbd>' + g.kbd + '</kbd></button>' }).join('') +
+        '</div></div>'
+    }
+    if (t.kind === 'files') {
+      return '<div class="p-head"><span class="grow">' + pathHtml('~/Documents/dsh-startup-screen') + '</span>' +
+        '<button class="icon-btn" aria-label="重新读取"><svg class="i" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg></button></div>' +
+        '<div class="ftree">' + treeHtml(TREE, 0) + '</div>'
+    }
+    if (t.kind === 'review') {
+      var f = CHANGED.filter(function (c) { return c.path === t.file })[0] || CHANGED[0]
+      return '<div class="p-head"><span class="grow" style="position:relative">' +
+        '<button class="rv-pick" id="rvPick" aria-haspopup="menu" aria-label="切换文件">' + pathHtml(f.path) + '<span class="num"><span class="add">+' + f.add + '</span> <span class="del">−' + f.del + '</span></span><svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="m6 9 6 6 6-6"/></svg></button>' +
+        '</span>' +
+        '<span class="seg"><button data-view="unified" aria-pressed="' + (rvView === 'unified') + '">单栏</button><button data-view="split" aria-pressed="' + (rvView === 'split') + '">左右</button></span>' +
+        '<button class="icon-btn" data-wrap aria-pressed="' + rvWrap + '" aria-label="自动换行"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h13a3 3 0 0 1 0 6h-4M4 17h6M15 16l-2 2 2 2"/></svg></button>' +
+        '<button class="icon-btn" data-openfile="' + f.path + '" aria-label="打开完整文件"><svg class="i" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg></button></div>' +
+        (f.isNew ? '<div class="rv-note">本轮新建的文件</div>' : '') + diffHtml(f)
+    }
+    if (t.kind === 'terminal') {
+      return '<div class="p-head"><span class="grow">' + pathHtml('~/Documents/dsh-startup-screen') + '</span><span class="num" style="color:var(--muted)">zsh</span></div>' +
+        '<div class="term"><span class="pr">~/dsh-startup-screen $</span> pnpm test\n<span class="mu">&gt; node test/smoke-host.mjs &amp;&amp; node test/smoke-splash.mjs</span>\n<span class="ok">✓</span> smoke-host      <span class="mu">94 assertions</span>\n<span class="ok">✓</span> smoke-splash    <span class="mu">171 assertions</span>\n<span class="ok">✓</span> smoke-client    <span class="mu">46 assertions</span>\n<span class="ok">✓</span> desktop-boot    <span class="mu">41 assertions</span>\n\n<span class="ok">352 passed</span> <span class="mu">· 4.1s</span>\n<span class="pr">~/dsh-startup-screen $</span> <span class="caret"></span></div>'
+    }
+    if (t.kind === 'browser') {
+      return '<div class="p-head"><span class="urlbar">' + ICON.browser + '<input aria-label="网址" placeholder="输入网址" value=""></span></div><div class="b-empty">输入网址后在这里浏览</div>'
+    }
+    if (t.kind === 'preview') {
+      var body_ = PREVIEW[t.file] || fileText(t.file)
+      return '<div class="p-head"><span class="grow">' + pathHtml(t.file) + '</span></div>' + (body_ ? '<div class="prev">' + esc(body_) + '</div>' : '<div class="f-empty">demo 里没有这个文件的内容</div>')
+    }
+    return ''
+  }
+  /* 改动过的文件：用对比里的新侧内容当预览 */
+  function fileText(path) {
+    var f = CHANGED.filter(function (c) { return c.path === path })[0]
+    if (!f) return ''
+    return f.hunks[0].lines.filter(function (l) { return l[0] !== '-' }).map(function (l) { return l[3] }).join('\n') + '\n…'
+  }
+  function treeHtml(nodes, lv) {
+    return nodes.map(function (n) {
+      if (n.d) {
+        return '<button class="frow' + (n.open ? ' open' : '') + '" style="--lv:' + lv + '" data-dir="' + n.n + '-' + lv + '"><svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg><span class="nm">' + n.n + '</span></button>' + (n.open ? treeHtml(n.c, lv + 1) : '')
+      }
+      return '<button class="frow" style="--lv:' + lv + '" data-file="' + (n.p || n.n) + '"><span class="pad"></span><span class="nm">' + n.n + '</span>' + (n.st ? '<span class="st ' + n.st.toLowerCase() + '">' + n.st + '</span>' : '') + '</button>'
+    }).join('')
+  }
+  function findDir(nodes, key, lv) {
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i]
+      if (n.d && n.n + '-' + lv === key) return n
+      if (n.d && n.open) { var r = findDir(n.c, key, lv + 1); if (r) return r }
+    }
+  }
+  function diffHtml(f) {
+    var h = f.hunks[0]
+    if (rvView === 'unified') {
+      return '<div class="diff' + (rvWrap ? ' wrap' : '') + '"><div class="hk">' + esc(h.h) + '</div>' + h.lines.map(function (l) {
+        var cls = l[0] === '+' ? 'add' : l[0] === '-' ? 'del' : ''
+        return '<div class="dl ' + cls + '"><span class="ln">' + (l[1] || '') + '</span><span class="ln">' + (l[2] || '') + '</span><span class="sg">' + (l[0] === ' ' ? '' : l[0]) + '</span><code>' + esc(l[3]) + '</code></div>'
+      }).join('') + '</div>'
+    }
+    /* 左右对比：删除行在左、新增在右，空位用斜纹补齐 */
+    var L = [], R = []
+    h.lines.forEach(function (l) {
+      if (l[0] === ' ') { while (L.length < R.length) L.push(null); while (R.length < L.length) R.push(null); L.push(l); R.push(l) }
+      else if (l[0] === '-') L.push(l)
+      else R.push(l)
+    })
+    while (L.length < R.length) L.push(null); while (R.length < L.length) R.push(null)
+    function col(arr, side) {
+      return arr.map(function (l) {
+        if (!l) return '<div class="dl pad"><span class="ln"></span><span class="sg"></span><code> </code></div>'
+        var cls = l[0] === '+' ? 'add' : l[0] === '-' ? 'del' : ''
+        return '<div class="dl ' + cls + '"><span class="ln">' + (side ? l[2] : l[1]) + '</span><span class="sg">' + (l[0] === ' ' ? '' : l[0]) + '</span><code>' + esc(l[3]) + '</code></div>'
+      }).join('')
+    }
+    return '<div class="diff' + (rvWrap ? ' wrap' : '') + '"><div class="hk">' + esc(h.h) + '</div><div class="split"><div>' + col(L, 0) + '</div><div>' + col(R, 1) + '</div></div></div>'
+  }
+
+  $('dtabs').addEventListener('click', function (e) {
+    var c = e.target.closest('[data-close]'); if (c) { e.stopPropagation(); closeTab(c.dataset.close); return }
+    var t = e.target.closest('.dtab'); if (t) { activeTab = t.dataset.id; renderDock() }
+  })
+  $('dtabs').addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('dtab')) { e.preventDefault(); activeTab = e.target.dataset.id; renderDock() } })
+  $('dAdd').addEventListener('click', function () { addTab({ kind: 'guide' }); renderDock() })
+  $('dClose').addEventListener('click', closeDock)
+  $('dFull').addEventListener('click', function () { body.classList.toggle('dock-full') })
+  $('dockToggle').addEventListener('click', openDock)
+  $('dbody').addEventListener('click', function (e) {
+    var g = e.target.closest('[data-open]'); if (g) { openTab({ kind: g.dataset.open }); return }
+    var d = e.target.closest('[data-dir]'); if (d) { var n = findDir(TREE, d.dataset.dir, +d.style.getPropertyValue('--lv')); if (n) { n.open = !n.open; var st = $('dbody').scrollTop; renderDock(); $('dbody').scrollTop = st } return }
+    var f = e.target.closest('[data-file]')
+    if (f) { var p = f.dataset.file; if (CHANGED.some(function (c) { return c.path === p })) openTab({ kind: 'review', file: p }); else openTab({ kind: 'preview', file: p }); return }
+    var pk = e.target.closest('#rvPick')
+    if (pk) {
+      var cur = (tabs.filter(function (x) { return x.id === activeTab })[0] || {}).file
+      openPop(pk, '<div class="pop-h"><span>本轮改动 / CHANGES</span><span>' + CHANGED.length + '</span></div>' + CHANGED.map(function (c) { return pi(c.path, null, '<span style="font-family:var(--mono);font-size:12px">' + esc(c.path) + '</span>', { check: c.path === cur, aux: '+' + c.add + ' −' + c.del }) }).join(''), { width: 300, onPick: function (v) { openTab({ kind: 'review', file: v }) } })
+      return
+    }
+    var v = e.target.closest('[data-view]'); if (v) { rvView = v.dataset.view; renderDock(); return }
+    if (e.target.closest('[data-wrap]')) { rvWrap = !rvWrap; renderDock(); return }
+    var of = e.target.closest('[data-openfile]'); if (of) { openTab({ kind: 'preview', file: of.dataset.openfile }); return }
+  })
+  document.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'p') { e.preventDefault(); openTab({ kind: 'files' }) }
+  })
+  /* 对话里的改动文件卡片 → 右侧栏对比页 */
+  $('flowIn').addEventListener('click', function (e) {
+    var r = e.target.closest('[data-review]'); if (r) openTab({ kind: 'review', file: r.dataset.review })
+  })
+
+  /* ── 揭幕衔接 ──────────────────────────────────────────────────────
+     启动页终幕常驻：底板 / 机框 / 品牌块 / REV+时钟 / 阶段格 / 页脚，
+     主界面这些件同坐标、默认就可见（不带 data-in），揭幕时原地不动。
+     其余部件在 dsu-handoff（镜头后撤）那一刻开始装配，和启动页的淡出叠在一起。
+     启动页淡出之后，REV/时钟/阶段格这组开机读数退场，品牌块缩成 logo，侧栏收窄。 */
+  var assembled = false, dockTimer = null
+  function dock(instant) {
+    if (instant) {
+      body.classList.add('instant', 'is-docked')
+      void body.offsetWidth
+      setTimeout(function () { body.classList.remove('instant') }, 50)
+    } else body.classList.add('is-docked')
+    if (userSideW) body.style.setProperty('--side-w', userSideW + 'px')
+  }
+  function dockReticle() {
+    var el = $('reticle')
+    var r = el.getBoundingClientRect()
+    if (!r.width) return
+    /* 起点：启动页准星的几何 —— 视口 (50%, 45%)，边长 min(66vw, 94vh, 1180) */
+    var big = Math.min(innerWidth * 0.66, innerHeight * 0.94, 1180)
+    var dx = innerWidth * 0.5 - (r.left + r.width / 2)
+    var dy = innerHeight * 0.45 - (r.top + r.height / 2)
+    el.classList.remove('docking')
+    el.style.transform = 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(' + (big / r.width).toFixed(3) + ')'
+    el.style.opacity = '0'
+    void el.offsetWidth
+    el.classList.add('docking')
+    el.style.transform = ''
+    el.style.opacity = ''
+  }
+  function assemble() {
+    if (assembled) return
+    assembled = true
+    /* 没放启动页：直接停在收起态，不演退场 */
+    if (!seenRoot) dock(true)
+    else dockTimer = setTimeout(function () { dock(false) }, 1500)
+    dockReticle()
+    body.classList.add('is-ready')
+    var sc = document.querySelector('.hos-scan'); sc.classList.remove('go'); void sc.offsetWidth; sc.classList.add('go')
+    setTimeout(function () { setCtx(body.dataset.phase === 'active' ? 38 : 0) }, 700)
+    setTimeout(function () { $('input').focus({ preventScroll: true }) }, 900)
+    if (/[?&]run=1/.test(location.search)) setTimeout(function () { runDemo() }, 1200)
+    /* 截图用：?ui=settings:<分组> | pop:<model|preset|perm|ws|attach|skill|more|filter|acct> | confirm:full */
+    var uq = (location.search.match(/[?&]ui=([\w:]+)/) || [])[1]
+    if (uq) setTimeout(function () {
+      var p = uq.split(':')
+      if (p[0] === 'settings') openSettings(p[1])
+      if (p[0] === 'confirm') setPerm(p[1] || 'full')
+      if (p[0] === 'pop') { var m = { model: '.model', preset: '#chipPreset', perm: '#chipPerm', ws: '#chipWs', attach: '#btnAttach', skill: '#btnSkill', more: '#btnMore', filter: '#btnFilter', acct: '#acct' }[p[1]]; if (m) document.querySelector(m).click() }
+    }, 500)
+    var dq = (location.search.match(/[?&]dock=(\w+)/) || [])[1]
+    if (dq) setTimeout(function () { if (dq === 'guide') openDock(); else openTab(dq === 'review' ? { kind: 'review', file: 'skin/lib/client.js' } : { kind: dq }) }, 300)
+  }
+  function unassemble() {
+    assembled = false
+    clearTimeout(dockTimer)
+    body.style.removeProperty('--side-w')
+    body.classList.add('instant')
+    body.classList.remove('is-ready', 'is-docked', 'side-collapsed')
+    void body.offsetWidth
+    body.classList.remove('instant')
+  }
+  /* 盯住启动页根节点：出现 dsu-handoff / dsu-gone 就装配；根节点消失也装配（兜底） */
+  var seenRoot = false
+  var mo = new MutationObserver(function () {
+    var root = document.getElementById('dsh-startup-root')
+    /* 只有见过根节点、它又被摘掉，才算启动页结束；重播时新脚本还没挂上根节点，不能误判 */
+    if (!root) { if (seenRoot && !assembled) assemble(); return }
+    seenRoot = true
+    if (/\bdsu-(handoff|gone)\b/.test(root.className)) assemble()
+  })
+  mo.observe(body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] })
+  window.addEventListener('dsh-startup:done', assemble)
+  if (!window.__HOS_SPLASH__ || !document.getElementById('dsh-startup-root')) setTimeout(assemble, 60)
+
+  /* ── demo 控制 ── */
+  $('dReplay').addEventListener('click', function () {
+    resetChat()
+    unassemble()
+    seenRoot = false
+    window.__DSH_STARTUP__.enabled = true
+    window.__DSH_STARTUP__.theme = document.documentElement.getAttribute('data-theme')
+    if (window.__DSH_STARTUP_API__ && window.__DSH_STARTUP_API__.replay) window.__DSH_STARTUP_API__.replay()
+    else { var s = document.createElement('script'); s.src = '../packages/dsh-startup-screen/lib/splash.js?t=' + Date.now(); document.head.appendChild(s) }
+  })
+  $('dTheme').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+    document.documentElement.setAttribute('data-theme', next)
+    try { localStorage.setItem('hos-theme', next) } catch (e) {}
+  })
+  $('dRun').addEventListener('click', function () { if (body.dataset.phase !== 'active') runDemo() })
+  $('dReset').addEventListener('click', resetChat)
+  $('menuBtn').addEventListener('click', toggleSide)
+  $('newSession').addEventListener('click', function () { resetChat(); body.classList.remove('side-open') })
+
+  /* ── 输入卡 ── */
+  var input = $('input'), send = $('send')
+  input.addEventListener('input', function () {
+    send.disabled = !input.value.trim() && !running
+    input.style.height = 'auto'; input.style.height = Math.min(220, input.scrollHeight) + 'px'
+  })
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('composer').requestSubmit() }
+  })
+  $('composer').addEventListener('submit', function (e) {
+    e.preventDefault()
+    if (running) { stopRun(); return }
+    var text = input.value.trim()
+    if (!text) return
+    input.value = ''; input.style.height = ''
+    runDemo(text)
+  })
+
+  /* ── hero → 对话态：输入卡用 FLIP 从中部落到底部 ── */
+  function toActive() {
+    if (body.dataset.phase === 'active') return
+    var seat = $('seat'), before = seat.getBoundingClientRect().top
+    body.dataset.phase = 'active'
+    var after = seat.getBoundingClientRect().top
+    seat.style.transition = 'none'
+    seat.style.transform = 'translateY(' + (before - after) + 'px)'
+    void seat.offsetWidth
+    seat.style.transition = 'transform 640ms cubic-bezier(.16,.84,.24,1)'
+    seat.style.transform = ''
+    $('sessTitle').textContent = '主界面皮肤：衔接启动动画'
+    renderTree()
+  }
+
+  /* ── 演示会话脚本 ── */
+  var running = false, timers = [], t0 = 0, execTimer = null, runId = 0, stick = true
+  var TODOS = ['对齐终幕常驻元素的坐标', '抽出底板与机框 token', '侧栏与会话列表', '输入卡与模型选择', '暗色主题核对']
+  var FILES = []
+  var AUTO = /[?&]run=1/.test(location.search)
+  function later(ms, fn) { timers.push(setTimeout(fn, ms)) }
+  function wait(ms) { return new Promise(function (r) { later(ms, r) }) }
+  function renderTodos(doneN, show) {
+    $('todos').innerHTML = TODOS.map(function (t, k) {
+      var cls = k < doneN ? 'done' : k === doneN ? 'doing' : ''
+      return '<div class="todo ' + cls + '"><span class="bx">' + (k < doneN ? '[x]' : k === doneN ? '[/]' : '[ ]') + '</span><span>' + t + '</span></div>'
+    }).join('')
+    var all = doneN >= TODOS.length
+    $('todoNow').textContent = all ? '全部完成' : TODOS[doneN]
+    $('todoHead').querySelector('.bx').textContent = all ? '[x]' : '[/]'
+    $('todoCount').textContent = Math.min(doneN, TODOS.length) + ' / ' + TODOS.length
+    $('cmpStack').classList.toggle('has', !!show)
+  }
+  $('todoHead').addEventListener('click', function () {
+    var c = $('todoCard'); c.classList.toggle('open'); $('todoHead').setAttribute('aria-expanded', String(c.classList.contains('open')))
+  })
+  function setSys(text, busy) {
+    $('sysState').innerHTML = '<i class="dot"></i>' + esc(text)
+    $('sys').classList.toggle('busy', !!busy)
+  }
+  function changesCard() {
+    var add = 0, del = 0
+    CHANGED.forEach(function (c) { add += c.add; del += c.del })
+    return '<div class="chg-card cut" style="--cut:10px"><button class="chg-h" data-review="' + CHANGED[0].path + '">' + ICON.review + '<span>' + CHANGED.length + ' 个文件已更改</span><span class="num"><span class="add">+' + add + '</span> <span class="del">−' + del + '</span></span><span class="hint">在侧边栏预览</span></button>' +
+      CHANGED.map(function (c) { return '<button class="chg-row" data-review="' + c.path + '">' + pathHtml(c.path) + '<span class="num"><span class="add">+' + c.add + '</span> <span class="del">−' + c.del + '</span></span></button>' }).join('') + '</div>'
+  }
+  function nowStr() { var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) }
+  /* 只在贴着底部时跟随滚动；往上翻过就停下，并给一个「回到最新」 */
+  function scrollFlow() { var f = $('flow'); if (stick) f.scrollTop = f.scrollHeight }
+  $('flow').addEventListener('scroll', function () {
+    var f = $('flow'); stick = f.scrollHeight - f.scrollTop - f.clientHeight < 80
+    $('jump').classList.toggle('on', !stick && body.dataset.phase === 'active')
+  })
+  $('jump').addEventListener('click', function () { stick = true; var f = $('flow'); f.scrollTo({ top: f.scrollHeight, behavior: 'smooth' }) })
+
+  var STEPS = [
+    { vb: 'READ', tg: 'package/lib/splash.css', rt: '2182 行 · 0.2s', x: '读取 1–2182 行 · 77.3 KB\n命中：.dsu-brand  .dsu-meta  .dsu-slats  .dsu-foot  .dsu-frame' },
+    { vb: 'SEARCH', tg: '"dsu-handoff" in lib/', rt: '3 处 · 0.1s', x: 'lib/splash.js:2067   root.classList.add(\'dsu-handoff\')\nlib/splash.css:1038  #dsh-startup-root.dsu-handoff {\nlib/splash.css:1041    filter: blur(5px);' },
+    { vb: 'READ', tg: 'maid-atelier/lib/client.js', rt: '宿主 DOM 钩子 · 0.4s', x: 'data-slot=sidebar · data-composer-card · data-phase=hero|active\ndata-chat-flow-kind · data-conversation-scroll · data-testid=todo-panel' },
+    { vb: 'EDIT', tg: 'skin/lib/skin.css', file: 'skin/lib/skin.css' },
+    { vb: 'EDIT', tg: 'skin/lib/client.js', file: 'skin/lib/client.js' }
+  ]
+  function addTool(tools, s) {
+    var prev = tools.querySelector('.tool.run'); if (prev) { prev.classList.remove('run'); prev.classList.add('done') }
+    var f = s.file && CHANGED.filter(function (c) { return c.path === s.file })[0]
+    var row = document.createElement('div'); row.className = 'tool run'
+    if (f) row.dataset.review = f.path
+    row.setAttribute('role', 'button'); row.tabIndex = 0
+    row.setAttribute('aria-label', s.vb + ' ' + s.tg + (f ? '，在右侧栏查看对比' : '，展开详情'))
+    row.innerHTML = '<i class="st"></i><span class="vb">' + s.vb + '</span><span class="tg">' + esc(s.tg) + '</span><span class="rt">' + (f ? '<span class="add">+' + f.add + '</span> <span class="del">−' + f.del + '</span>' : esc(s.rt)) + '</span>' + (s.x ? '<div class="tool-x">' + esc(s.x) + '</div>' : '')
+    tools.appendChild(row)
+    if (f) FILES.push(f)
+    setSys(s.vb.toLowerCase() + '  ' + s.tg, true)
+    scrollFlow()
+    return row
+  }
+  $('flowIn').addEventListener('click', function (e) {
+    var t = e.target.closest('.tool')
+    if (!t || e.target.closest('.tool-x')) return
+    if (t.dataset.review) return  /* 交给 data-review 的通用处理：右侧栏打开对比 */
+    if (t.querySelector('.tool-x')) t.classList.toggle('open')
+  })
+  $('flowIn').addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('tool')) { e.preventDefault(); e.target.click() } })
+
+  /* 审批卡：运行命令前问一次（demo 自动模式下 1.4 秒后自动允许） */
+  function askApproval(ai, cmd) {
+    return new Promise(function (res) {
+      var card = document.createElement('div'); card.className = 'approve'; card.setAttribute('role', 'group'); card.setAttribute('aria-label', '需要确认')
+      card.innerHTML = '<div class="k">APPROVAL · 需要确认</div><b>运行命令</b><pre>' + esc(cmd) + '</pre><small>当前权限「' + PERM[STATE.perm].t + '」：运行命令前需要你确认。</small>' +
+        '<div class="acts"><button class="btn primary sm" data-a="once"><span>允许一次</span></button><button class="btn sm" data-a="always"><span>本会话总是允许</span></button><button class="btn ghost sm" data-a="deny"><span>拒绝</span></button></div>'
+      ai.querySelector('.tools').appendChild(card)  /* 排在工具行里，紧挨着它要批准的那条命令 */
+      setSys('wait  approval', true)
+      scrollFlow()
+      var settled = false
+      function done(a) {
+        if (settled) return; settled = true
+        card.classList.add('done')
+        card.innerHTML = '<span class="res">' + (a === 'deny' ? '已拒绝 · ' : a === 'always' ? '本会话总是允许 · ' : '已允许一次 · ') + esc(cmd) + '</span>'
+        if (a === 'always') STATE.always = true
+        res(a !== 'deny')
+      }
+      card.addEventListener('click', function (e) { var b = e.target.closest('[data-a]'); if (b) done(b.dataset.a) })
+      if (STATE.perm === 'full' || STATE.perm === 'auto' || STATE.always) { done('always') }
+      else if (AUTO) later(1400, function () { done('once') })
+      else setTimeout(function () { var b = card.querySelector('[data-a="once"]'); if (b) b.focus({ preventScroll: true }) }, 60)
+    })
+  }
+
+  async function runDemo(text) {
+    resetChat(true)
+    toActive()
+    var my = ++runId
+    function alive() { return my === runId }
+    running = true; runningSess = 's43'; stick = true
+    send.disabled = false; send.classList.add('stop'); send.setAttribute('aria-label', '停止')
+    send.innerHTML = '<svg class="i" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" fill="currentColor" stroke="none"/></svg>'
+    $('cmpState').textContent = 'EXECUTING'
+    renderTree(); renderTodos(0, false); FILES = []; setCtx(12); setSys('think …', true)
+    var flow = $('flowIn')
+    var msg = text || '按启动页的风格给 DSH 做一套主界面皮肤，揭幕后要无缝接上。先出 demo。'
+    flow.insertAdjacentHTML('beforeend',
+      '<div class="e-user"><div class="e-head"><span>OPERATOR</span><span class="sep"></span><b>' + esc(SET.startup.name || 'JOYCE MOORE') + '</b><span>' + nowStr() + '</span></div><div class="bubble">' + esc(msg) + '</div></div>')
+    var ai = document.createElement('div'); ai.className = 'e-ai running'
+    ai.innerHTML = '<div class="e-head"><i class="mark"></i><b>HARNESS</b><span class="sep"></span><span>' + esc(STATE.model.toLowerCase()) + ' · ' + esc(STATE.preset) + '</span></div>' +
+      '<div class="think open"><button class="think-t" type="button" aria-expanded="true"><svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="m9 6 6 6-6 6"/></svg>思考中 <span class="en">REASONING</span></button>' +
+      '<div class="think-b"></div></div><div class="tools"></div><div class="prose"></div>' +
+      '<div class="exec"><svg viewBox="0 0 24 24"><circle class="ring" cx="12" cy="12" r="9"/><path class="arc" d="M12 3a9 9 0 0 1 9 9"/></svg><span class="zh">执行中</span><span>EXECUTING</span><span class="t">00.0s</span></div>'
+    flow.appendChild(ai)
+    var tt = ai.querySelector('.think-t')
+    tt.addEventListener('click', function () { var th = ai.querySelector('.think'); th.classList.toggle('open'); tt.setAttribute('aria-expanded', String(th.classList.contains('open'))) })
+    t0 = Date.now()
+    execTimer = setInterval(function () { var t = ai.querySelector('.exec .t'); if (t) t.textContent = ((Date.now() - t0) / 1000).toFixed(1).padStart(4, '0') + 's' }, 100)
+    traceAmp = 2.4
+    scrollFlow()
+
+    await streamP(ai.querySelector('.think-b'), '先确认启动页最后一帧留下了什么：底板、机框、品牌块、REV 与时钟、阶段格、页脚。这六件在主界面里必须同坐标出现，镜头后撤时才不会跳。其余部件沿用启动页的入场节奏装配。', 1500)
+    if (!alive()) return
+    var th = ai.querySelector('.think'); th.classList.remove('open'); tt.setAttribute('aria-expanded', 'false')
+    tt.innerHTML = '<svg class="i" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="m9 6 6 6-6 6"/></svg>已思考 ' + ((Date.now() - t0) / 1000).toFixed(1) + 's <span class="en">REASONING</span>'
+    var tools = ai.querySelector('.tools')
+    renderTodos(0, true)
+    for (var k = 0; k < STEPS.length; k++) {
+      await wait(k ? 620 : 200); if (!alive()) return
+      addTool(tools, STEPS[k])
+      if (k === 1) renderTodos(1, true)
+      if (k === 3) { renderTodos(2, true); setCtx(26) }
+      if (k === 4) renderTodos(3, true)
+    }
+    await wait(560); if (!alive()) return
+    var prev = tools.querySelector('.tool.run'); if (prev) { prev.classList.remove('run'); prev.classList.add('done') }
+    var ok = await askApproval(ai, 'pnpm test'); if (!alive()) return
+    var prose = ai.querySelector('.prose')
+    if (!ok) {
+      prose.innerHTML = '<p>好，测试先不跑。两个文件已经改完，你方便时再运行 <code>pnpm test</code> 核对。</p>' + changesCard()
+      renderTodos(4, true); setCtx(31); finishRun(ai, 5); return
+    }
+    addTool(tools, { vb: 'RUN', tg: 'pnpm test', rt: '352 passed · 4.1s', x: '✓ smoke-host      94 assertions\n✓ smoke-splash    171 assertions\n✓ smoke-client    46 assertions\n✓ desktop-boot    41 assertions' })
+    renderTodos(4, true); setCtx(38)
+    await wait(900); if (!alive()) return
+    prev = tools.querySelector('.tool.run'); if (prev) { prev.classList.remove('run'); prev.classList.add('done') }
+    setSys('write  reply', true)
+    prose.innerHTML = '<p class="p1"></p>'
+    await streamP(prose.querySelector('.p1'), '启动页终幕的六个常驻件已和主界面对齐，揭幕时原地不动；新增部件在镜头后撤那一刻开始装配。', 1200)
+    if (!alive()) return
+    prose.insertAdjacentHTML('beforeend',
+      '<ul><li>作用域挂在 <code>body[data-dsh-harness-os]</code>，卸载即还原</li><li>当前会话沿用终幕「DEEPSEEK HARNESS」的黑底白字</li><li>开机读数在揭幕后退场，品牌块缩成 logo</li></ul>' +
+      '<div class="codeblock"><div class="ch"><span>CLIENT.JS</span><span>JS</span></div><button class="icon-btn cp" aria-label="复制代码">' + IC.copy + '</button><pre><span class="c">// 揭幕那一刻开始装配，和启动页淡出叠在一起</span>\n<span class="k">window</span>.addEventListener(<span class="s">\'dsh-startup:done\'</span>, assemble)\n<span class="k">new</span> MutationObserver(onHandoff).observe(document.body, { subtree: <span class="k">true</span> })</pre></div>' + changesCard())
+    renderTodos(5, true)
+    scrollFlow()
+    await wait(400); if (!alive()) return
+    finishRun(ai, 6)
+  }
+  function streamP(el, text, total) { return new Promise(function (r) { streamText(el, text, 0, total, r) }) }
+  function streamText(el, text, i, total, done) {
+    var step = Math.max(12, total / text.length)
+    var caret = document.createElement('span'); caret.className = 'caret'
+    el.appendChild(caret)
+    var k = 0
+    var iv = setInterval(function () {
+      k += 1
+      el.textContent = text.slice(0, k); el.appendChild(caret)
+      scrollFlow()
+      if (k >= text.length) { clearInterval(iv); caret.remove(); if (done) done() }
+    }, step)
+    timers.push({ iv: iv })
+  }
+  function finishRun(ai, nTools) {
+    running = false; runningSess = null
+    clearInterval(execTimer)
+    ai = ai || document.querySelector('.e-ai.running')
+    var secs = ((Date.now() - t0) / 1000).toFixed(1)
+    if (ai) {
+      ai.classList.remove('running')
+      var ex = ai.querySelector('.exec')
+      if (ex) ex.outerHTML = '<div class="exec"><span>' + (nTools ? 'COMPLETE' : 'STOPPED') + '</span><span class="t">' + secs + 's</span>' + (nTools ? '<span>· ' + nTools + ' TOOLS · ' + FILES.length + ' FILES</span>' : '') + '</div>'
+      if (nTools && !ai.querySelector('.msg-acts')) ai.insertAdjacentHTML('beforeend', '<div class="msg-acts"><button class="icon-btn" data-ma="copy" aria-label="复制回答">' + IC.copy + '</button><button class="icon-btn" data-ma="redo" aria-label="重新生成">' + IC.redo + '</button><button class="icon-btn" data-ma="up" aria-label="有帮助" aria-pressed="false">' + IC.up + '</button><button class="icon-btn" data-ma="down" aria-label="没帮助" aria-pressed="false">' + IC.down + '</button></div>')
+    }
+    traceAmp = 1
+    setSys(nTools ? 'ready · last run ' + secs + 's' : 'ready · stopped', false)
+    send.classList.remove('stop'); send.setAttribute('aria-label', '发送')
+    send.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>'
+    send.disabled = !input.value.trim()
+    $('cmpState').textContent = 'IDLE'
+    renderTree()
+  }
+  $('flowIn').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ma]')
+    if (b) {
+      var a = b.dataset.ma
+      if (a === 'copy') { try { navigator.clipboard.writeText(b.closest('.e-ai').querySelector('.prose').innerText) } catch (er) {} toast('已复制回答', { label: 'COPIED', ms: 1600 }) }
+      else if (a === 'redo') runDemo()
+      else { var on = b.getAttribute('aria-pressed') !== 'true'; b.parentNode.querySelectorAll('[data-ma="up"],[data-ma="down"]').forEach(function (x) { x.setAttribute('aria-pressed', 'false') }); b.setAttribute('aria-pressed', String(on)); if (on) toast('感谢反馈', { label: 'FEEDBACK', ms: 1600 }) }
+      return
+    }
+    var cp = e.target.closest('.cp')
+    if (cp) { try { navigator.clipboard.writeText(cp.parentNode.querySelector('pre').innerText) } catch (er) {} toast('已复制代码', { label: 'COPIED', ms: 1600 }) }
+  })
+  function stopRun() {
+    runId++
+    timers.forEach(function (t) { if (t && t.iv) clearInterval(t.iv); else clearTimeout(t) }); timers = []
+    var c = document.querySelector('.e-ai.running .caret'); if (c) c.remove()
+    var ap = document.querySelector('.e-ai.running .approve:not(.done)'); if (ap) { ap.classList.add('done'); ap.innerHTML = '<span class="res">已停止</span>' }
+    finishRun(null, 0)
+  }
+  function resetChat(keep) {
+    runId++
+    timers.forEach(function (t) { if (t && t.iv) clearInterval(t.iv); else clearTimeout(t) }); timers = []
+    clearInterval(execTimer)
+    running = false; runningSess = null; traceAmp = 1
+    $('flowIn').innerHTML = ''
+    $('jump').classList.remove('on')
+    renderTodos(0, false); setSys('ready', false)
+    send.classList.remove('stop'); send.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>'
+    send.disabled = !input.value.trim()
+    $('cmpState').textContent = 'IDLE'
+    if (!keep) {
+      var seat = $('seat'); seat.style.transition = ''; seat.style.transform = ''
+      body.dataset.phase = 'hero'
+      $('sessTitle').textContent = '新会话'
+      if (assembled) { setCtx(0); dockReticleSoft() }
+      renderTree()
+    }
+  }
+  function dockReticleSoft() {
+    var el = $('reticle'); el.classList.remove('docking'); el.style.opacity = '0'; el.style.transform = 'translate(-50%,-50%) scale(.9)'
+    void el.offsetWidth; el.classList.add('docking'); el.style.opacity = ''; el.style.transform = ''
+  }
+  /* ══ 统一浮层体系 ══════════════════════════════════════════════════ */
+  var SVG = function (d, w) { return '<svg class="i" viewBox="0 0 24 24"' + (w ? ' style="width:' + w + 'px;height:' + w + 'px"' : '') + '>' + d + '</svg>' }
+  var IC = {
+    check: SVG('<path d="m5 12 4.5 4.5L19 7"/>', 13),
+    chev: SVG('<path d="m6 9 6 6 6-6"/>', 12),
+    search: SVG('<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>', 13),
+    folder: SVG('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),
+    file: SVG('<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>'),
+    image: SVG('<rect x="3" y="4" width="18" height="16"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-9 8"/>'),
+    at: SVG('<circle cx="12" cy="12" r="3.5"/><path d="M15.5 12v1.5a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.3 6.7"/>'),
+    spark: SVG('<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>'),
+    edit: SVG('<path d="M4 20h4L19 9l-4-4L4 16z"/>'),
+    pin: SVG('<path d="M9 4h6l-1 5 3 3H7l3-3zM12 15v5"/>'),
+    out: SVG('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'),
+    trash: SVG('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'),
+    gear: SVG('<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>'),
+    send: SVG('<path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/>'),
+    exit: SVG('<path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/>'),
+    finder: SVG('<rect x="3" y="4" width="18" height="16"/><path d="M12 4c-1.5 4-1.5 12 0 16M8 10v1M16 10v1"/>'),
+    eye: SVG('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.5"/>'),
+    shield: SVG('<path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6z"/>'),
+    bolt: SVG('<path d="M13 3 5 13h6l-1 8 8-10h-6z"/>'),
+    copy: SVG('<rect x="8" y="8" width="12" height="12"/><path d="M16 8V4H4v12h4"/>', 14),
+    redo: SVG('<path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/>', 14),
+    up: SVG('<path d="M7 11v9H4v-9zM7 11l4-8c1.5 0 2.5 1 2.5 2.5V9h5.2a2 2 0 0 1 2 2.4l-1.4 7A2 2 0 0 1 17.3 20H7"/>', 14),
+    down: SVG('<path d="M7 13V4H4v9zM7 13l4 8c1.5 0 2.5-1 2.5-2.5V15h5.2a2 2 0 0 0 2-2.4l-1.4-7A2 2 0 0 0 17.3 4H7"/>', 14),
+    plug: SVG('<path d="M9 3h6v4a2 2 0 1 0 4 0h2v6h-4a2 2 0 1 0 0 4h4v4h-6v-2a2 2 0 1 0-4 0v2H3v-6h2a2 2 0 1 0 0-4H3V7h6z"/>'),
+    user: SVG('<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 4-5.5 7-5.5s5.8 1.9 7 5.5"/>'),
+    cube: SVG('<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>'),
+    loop: SVG('<path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 12a8 8 0 0 1-14 5.3L4 15M20 4v5h-5M4 20v-5h5"/>'),
+    tree: SVG('<circle cx="6" cy="6" r="2"/><circle cx="18" cy="12" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 6h4v12H8M12 12h4"/>'),
+    term: SVG('<rect x="3" y="4" width="18" height="16"/><path d="m7 9 3 3-3 3M12 15h5"/>'),
+    globe: SVG('<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17"/>'),
+    list: SVG('<path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"/>'),
+    play: SVG('<path d="M7 4v16l13-8z"/>'),
+    doc: SVG('<path d="M6 3h8l4 4v14H6z"/><path d="M9 12h6M9 16h6"/>'),
+    palette: SVG('<circle cx="12" cy="12" r="8.5"/><circle cx="8.5" cy="10" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="15.5" cy="10" r="1"/><path d="M12 20.5c-1.5 0-2-1.2-1.3-2.2.8-1.3 0-2.8-1.5-2.8"/>')
+  }
+  function pi(v, ic, title, o) {
+    o = o || {}
+    return '<button class="pop-item' + (o.danger ? ' danger' : '') + '" role="' + (o.check != null ? 'menuitemradio' : 'menuitem') + '" data-v="' + esc(v) + '"' +
+      (o.check != null ? ' aria-checked="' + !!o.check + '"' : '') + (o.disabled ? ' aria-disabled="true"' : '') + (o.search ? ' data-s="' + esc(o.search) + '"' : '') + '>' +
+      (o.check != null && !ic ? '<span class="ck">' + (o.check ? IC.check : '') + '</span>' : (ic || '<span></span>')) +
+      '<span class="tx"><b>' + title + '</b>' + (o.desc ? '<small>' + o.desc + '</small>' : '') + '</span>' +
+      (o.aux ? '<span class="aux">' + o.aux + '</span>' : o.kbd ? '<kbd>' + o.kbd + '</kbd>' : o.check && ic ? '<span class="ck">' + IC.check + '</span>' : '<span></span>') + '</button>'
+  }
+  var POP = null
+  function closePop(refocus) {
+    if (!POP) return
+    var p = POP; POP = null
+    p.el.classList.remove('open')
+    if (p.anchor) p.anchor.setAttribute('aria-expanded', 'false')
+    setTimeout(function () { p.el.remove() }, 200)
+    if (refocus && p.anchor) p.anchor.focus()
+    if (p.onClose) p.onClose()
+  }
+  /* opts: { align: 'start'|'end', prefer: 'down'|'up', onPick(v, el) → 返回 true 保持打开, onOpen(el), width } */
+  function openPop(anchor, html, opts) {
+    opts = opts || {}
+    if (POP && POP.anchor === anchor) { closePop(); return }
+    closePop()
+    var el = document.createElement('div'); el.className = 'pop'; el.setAttribute('role', 'menu')
+    el.innerHTML = '<div class="pop-in"' + (opts.width ? ' style="min-width:' + opts.width + 'px"' : '') + '>' + html + '</div>'
+    document.body.appendChild(el)
+    POP = { el: el, anchor: anchor, onClose: opts.onClose }
+    anchor.setAttribute('aria-expanded', 'true')
+    var r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight
+    var up = opts.prefer === 'up' ? r.top - h - 6 > 8 : r.bottom + h + 6 > innerHeight - 8 && r.top - h - 6 > 8
+    var x = opts.align === 'end' ? r.right - w : r.left
+    el.style.left = Math.max(8, Math.min(innerWidth - w - 8, x)) + 'px'
+    el.style.top = (up ? r.top - h - 6 : r.bottom + 6) + 'px'
+    if (up) el.classList.add('up')
+    requestAnimationFrame(function () { el.classList.add('open') })
+    if (opts.onOpen) opts.onOpen(el)
+    var first = el.querySelector('input') || el.querySelector('.pop-item:not([aria-disabled])')
+    if (first) first.focus({ preventScroll: true })
+    el.addEventListener('click', function (e) {
+      var it = e.target.closest('.pop-item, [data-v]')
+      if (!it || it.getAttribute('aria-disabled') === 'true') return
+      var keep = opts.onPick && opts.onPick(it.dataset.v, it, e)
+      if (!keep) closePop(true)
+    })
+    el.addEventListener('keydown', function (e) {
+      var items = Array.prototype.slice.call(el.querySelectorAll('.pop-item:not([aria-disabled]):not([hidden])'))
+      var i = items.indexOf(document.activeElement)
+      if (e.key === 'ArrowDown') { e.preventDefault(); (items[i + 1] || items[0]).focus() }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); (items[i - 1] || items[items.length - 1]).focus() }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closePop(true) }
+      else if (e.key === 'Tab') closePop()
+    })
+    var s = el.querySelector('.pop-search input')
+    if (s) s.addEventListener('input', function () {
+      var q = s.value.trim().toLowerCase(), n = 0
+      el.querySelectorAll('.pop-item[data-s]').forEach(function (it) { var hit = !q || it.dataset.s.toLowerCase().indexOf(q) !== -1; it.hidden = !hit; if (hit) n++ })
+      var em = el.querySelector('.pop-empty'); if (em) em.hidden = n > 0
+    })
+    return el
+  }
+  document.addEventListener('pointerdown', function (e) {
+    if (POP && !POP.el.contains(e.target) && !(POP.anchor && POP.anchor.contains(e.target))) closePop()
+  }, true)
+  addEventListener('resize', function () { closePop() })
+  document.addEventListener('scroll', function () { closePop() }, true)
+
+  /* —— 悬停提示：读 aria-label（或 data-tip），带 data-kbd 时附快捷键 —— */
+  var tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl)
+  var tipT = null, tipFor = null
+  function hideTip() { clearTimeout(tipT); tipEl.classList.remove('on'); tipFor = null }
+  document.addEventListener('pointerover', function (e) {
+    var t = e.target.closest('.icon-btn[aria-label], [data-tip]')
+    if (!t || t === tipFor) return
+    hideTip(); tipFor = t
+    tipT = setTimeout(function () {
+      if (POP && POP.anchor === t) return
+      tipEl.innerHTML = esc(t.dataset.tip || t.getAttribute('aria-label')) + (t.dataset.kbd ? '<kbd>' + esc(t.dataset.kbd) + '</kbd>' : '')
+      var r = t.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight
+      var below = r.bottom + h + 8 < innerHeight
+      tipEl.style.left = Math.max(6, Math.min(innerWidth - w - 6, r.left + r.width / 2 - w / 2)) + 'px'
+      tipEl.style.top = (below ? r.bottom + 6 : r.top - h - 6) + 'px'
+      tipEl.classList.add('on')
+    }, 450)
+  })
+  document.addEventListener('pointerout', function (e) { if (tipFor && !tipFor.contains(e.relatedTarget)) hideTip() })
+  document.addEventListener('pointerdown', hideTip, true)
+
+  /* —— 轻提示 —— */
+  var toastBox = document.createElement('div'); toastBox.className = 'toasts'; toastBox.setAttribute('aria-live', 'polite'); document.body.appendChild(toastBox)
+  function toast(text, o) {
+    o = o || {}
+    var t = document.createElement('div'); t.className = 'toast'
+    t.innerHTML = '<span class="lb">' + (o.label || 'NOTICE') + '</span><span>' + esc(text) + '</span>' + (o.action ? '<button>' + esc(o.action) + '</button>' : '')
+    toastBox.appendChild(t)
+    var gone = function () { t.classList.add('out'); setTimeout(function () { t.remove() }, 220) }
+    var tm = setTimeout(gone, o.ms || 2600)
+    if (o.action) t.querySelector('button').addEventListener('click', function () { clearTimeout(tm); gone(); o.onAction && o.onAction() })
+  }
+  function soon(what) { toast(what + '在 demo 里还没有内容') }
+
+  /* —— 确认框 —— */
+  var CORNERS = '<i class="hos-corner c-tl"></i><i class="hos-corner c-tr"></i><i class="hos-corner c-bl"></i><i class="hos-corner c-br"></i>'
+  function openModal(inner, cls, onKey) {
+    var m = document.createElement('div'); m.className = 'modal'
+    m.innerHTML = '<div class="plate ' + cls + '" role="dialog" aria-modal="true">' + CORNERS + inner + '</div>'
+    document.body.appendChild(m)
+    requestAnimationFrame(function () { m.classList.add('open') })
+    var prev = document.activeElement
+    function close() { m.classList.remove('open'); document.removeEventListener('keydown', key, true); setTimeout(function () { m.remove() }, 220); if (prev && prev.focus) prev.focus() }
+    function key(e) {
+      if (e.key === 'Escape' && !POP) { e.preventDefault(); e.stopPropagation(); close(); onKey && onKey('esc') }
+      if (e.key === 'Tab') { /* 焦点留在框内 */
+        var f = Array.prototype.filter.call(m.querySelectorAll('button, input, [tabindex="0"]'), function (x) { return !x.disabled && x.offsetParent })
+        if (!f.length) return
+        if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus() }
+        else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus() }
+      }
+    }
+    document.addEventListener('keydown', key, true)
+    m.addEventListener('pointerdown', function (e) { if (e.target === m) { close(); onKey && onKey('esc') } })
+    return { el: m, close: close }
+  }
+  function confirmDlg(o) {
+    return new Promise(function (res) {
+      var md = openModal('<div class="dlg"><div class="dlg-k">' + (o.k || 'CONFIRM') + '</div><h2>' + esc(o.title) + '</h2><p>' + esc(o.body) + '</p>' +
+        (o.ack ? '<button class="dlg-chk" type="button" role="checkbox" aria-checked="false" data-ack><span class="box"></span><span>' + esc(o.ack) + '</span></button>' : '') +
+        '<div class="dlg-f"><button class="btn ghost" data-no>取消</button><button class="btn ' + (o.danger ? 'danger' : 'primary') + '" data-ok' + (o.ack ? ' disabled' : '') + '><span>' + esc(o.ok) + '</span></button></div></div>', 'dlg-plate', function () { res(false) })
+      var el = md.el
+      var ack = el.querySelector('[data-ack]')
+      if (ack) ack.addEventListener('click', function () { var on = ack.getAttribute('aria-checked') !== 'true'; ack.setAttribute('aria-checked', String(on)); el.querySelector('[data-ok]').disabled = !on })
+      el.querySelector('[data-no]').addEventListener('click', function () { md.close(); res(false) })
+      el.querySelector('[data-ok]').addEventListener('click', function () { md.close(); res(true) })
+      setTimeout(function () { (ack || el.querySelector('[data-ok]')).focus() }, 30)
+    })
+  }
+
+  /* ══ 拖动调宽：左 264–420（默认 280），右 300–70%，中栏至少留 400 ══ */
+  var userSideW = null, userDockW = null
+  function shellRect() { return document.querySelector('.hos-shell').getBoundingClientRect() }
+  function sideW() { return document.querySelector('.hos-side').getBoundingClientRect().width }
+  function dockW() { return dockOpen() ? $('dock').getBoundingClientRect().width : 0 }
+  function setSideW(w) { userSideW = w; body.style.setProperty('--side-w', w + 'px'); syncRz() }
+  function setDockW(w) { userDockW = w; body.style.setProperty('--dock-open-w', w + 'px'); syncRz() }
+  function clampSide(w) { return Math.round(Math.max(264, Math.min(420, w, shellRect().width - dockW() - 400))) }
+  function clampDock(w) { return Math.round(Math.max(300, Math.min(innerWidth * 0.7, w, shellRect().width - sideW() - 400))) }
+  function syncRz() {
+    $('rzL').setAttribute('aria-valuenow', Math.round(sideW()))
+    $('rzR').setAttribute('aria-valuenow', Math.round(dockW()))
+  }
+  function bindRz(h, side) {
+    h.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return
+      e.preventDefault(); h.setPointerCapture(e.pointerId); h.classList.add('on'); body.classList.add('resizing'); hideTip(); closePop()
+      var sr = shellRect()
+      function mv(ev) {
+        if (side === 'l') setSideW(clampSide(ev.clientX - sr.left))
+        else setDockW(clampDock(sr.right - ev.clientX))
+      }
+      function up() { h.classList.remove('on'); body.classList.remove('resizing'); h.removeEventListener('pointermove', mv); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up) }
+      h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up)
+    })
+    h.addEventListener('dblclick', function () {
+      if (side === 'l') { userSideW = null; body.style.removeProperty('--side-w') } else { userDockW = null; body.style.removeProperty('--dock-open-w') }
+      toast(side === 'l' ? '侧栏宽度已恢复默认' : '右侧栏宽度已恢复默认')
+    })
+    h.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowLeft' ? -16 : e.key === 'ArrowRight' ? 16 : 0
+      if (!d) return
+      e.preventDefault()
+      body.classList.add('resizing')
+      if (side === 'l') setSideW(clampSide(sideW() + d)); else setDockW(clampDock(dockW() - d))
+      requestAnimationFrame(function () { body.classList.remove('resizing') })
+    })
+  }
+  bindRz($('rzL'), 'l'); bindRz($('rzR'), 'r')
+
+  /* ══ 菜单 ═══════════════════════════════════════════════════════════ */
+  var PERM = {
+    read: { t: '仅可查看', sys: 'read-only', d: '只读工作区，不修改文件、不执行有副作用的命令。', ic: IC.eye },
+    write: { t: '工作区内修改', sys: 'workspace-write', d: '可在工作区内读写文件、运行命令，越界操作前确认。', ic: IC.shield },
+    full: { t: '完全权限', sys: 'full-access', d: '减少确认步骤，可直接执行敏感操作、文件修改或外部命令。', ic: IC.bolt, risk: true },
+    auto: { t: '自动审查', sys: 'auto-review', d: '无沙箱运行；每次原生工具调用前由同一模型进行实验性审查。', ic: IC.spark, risk: true, exp: true }
+  }
+  var PRESETS = [
+    ['标准模式', 'STD', 'Agent 直接调用工具读写文件、检索资料和执行终端命令。'],
+    ['PTC 模式', 'PTC', '把多次工具调用写成脚本一次跑完，适合批量处理。'],
+    ['Cordis 模式', 'CDS', '面向插件开发：Agent 可以加载和调试 Cordis 插件。']
+  ]
+  var MODELS = [['DeepSeek 账号', [['DeepSeek-V4-Pro', '旗舰 · 1M 上下文'], ['DeepSeek-V4-Flash', '快速 · 低成本']]], ['Anthropic', [['Claude-Opus-5.5', '', 'API 密钥缺失']]]]
+  var EFFORTS = ['关闭', '低', '中', '高', 'Max']
+  var SKILLS = [['frontend-design', '界面设计与前端实现'], ['docx', '读写 Word 文档'], ['xlsx', '表格与数据处理'], ['pdf', 'PDF 读取与生成'], ['tdd', '先写测试再实现']]
+
+  function syncComposer() {
+    var m = document.querySelector('.model')
+    m.innerHTML = esc(STATE.model) + ' <span class="lv">' + (STATE.effort === '关闭' ? 'OFF' : STATE.effort === 'Max' ? 'MAX' : esc(STATE.effort)) + '</span>' + IC.chev
+    $('chipPreset').innerHTML = esc(STATE.preset) + ' <span class="en">' + PRESETS.filter(function (p) { return p[0] === STATE.preset })[0][1] + '</span>' + IC.chev
+    var P = PERM[STATE.perm]
+    $('chipPerm').innerHTML = P.ic + '<span' + (P.risk ? ' class="warn"' : '') + '>' + P.t + '</span>' + IC.chev
+    $('chipWs').innerHTML = IC.folder + esc(STATE.ws) + IC.chev
+    $('sysCfg').textContent = 'desktop · ' + P.sys + ' · 12 bundles'
+    $('chipSkills').innerHTML = STATE.skills.map(function (s) { return '<button type="button" class="chip" data-skill="' + s + '" aria-label="移除技能 ' + s + '">' + IC.spark + s + ' ×</button>' }).join('')
+  }
+  function setPerm(k) {
+    var P = PERM[k]
+    if (!P.risk) { STATE.perm = k; syncComposer(); return Promise.resolve(true) }
+    return confirmDlg({ k: P.exp ? 'EXPERIMENTAL' : 'PERMISSION', title: '确认启用' + P.t + (P.exp ? '（实验）' : '') + '？', body: P.exp ? '无沙箱运行，每次原生工具调用和 PTC 内层调用前由同一模型进行实验性审查。审查可能漏判，仅建议在你信任当前任务时使用。' : '启用完全权限后，智能体将减少确认步骤，并且可以直接执行更多操作，包括敏感操作、文件修改或外部命令。仅建议在你信任当前任务时使用。', ack: '我已了解风险，并愿意继续', ok: '启用' + P.t, danger: true })
+      .then(function (ok) { if (ok) { STATE.perm = k; syncComposer(); toast('权限已切换为「' + P.t + '」', { label: 'PERMISSION' }) } return ok })
+  }
+  function modelMenu(btn) {
+    var html = '<div class="pop-h"><span>模型 / MODEL</span></div><label class="pop-search">' + IC.search + '<input type="search" placeholder="搜索模型…" aria-label="搜索模型"></label>'
+    MODELS.forEach(function (g) {
+      html += '<div class="pop-h"><span>' + g[0] + '</span></div>' + g[1].map(function (m) { return pi(m[0], null, m[0], { check: STATE.model === m[0], desc: m[1], disabled: !!m[2], aux: m[2], search: g[0] + ' ' + m[0] }) }).join('')
+    })
+    html += '<div class="pop-empty" hidden>没有匹配的模型。</div><div class="pop-sep"></div><div class="pop-h"><span>推理等级 / EFFORT</span></div><div class="pop-foot"><span class="seg">' +
+      EFFORTS.map(function (e) { return '<button data-v="effort:' + e + '" aria-pressed="' + (STATE.effort === e) + '">' + e + '</button>' }).join('') + '</span></div>' +
+      '<div class="pop-sep"></div>' + pi('manage', IC.gear, '管理模型提供商')
+    openPop(btn, html, { align: 'end', width: 280, onPick: function (v, el) {
+      if (v === 'manage') { openSettings('models'); return }
+      if (v.indexOf('effort:') === 0) { STATE.effort = v.slice(7); syncComposer(); el.parentNode.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b === el)) }); return true }
+      STATE.model = v; syncComposer(); toast('本会话改用 ' + v, { label: 'MODEL' })
+    } })
+  }
+  function presetMenu(btn) {
+    openPop(btn, '<div class="pop-h"><span>Agent 预设 / PRESET</span></div>' + PRESETS.map(function (p) { return pi(p[0], null, p[0], { check: STATE.preset === p[0], desc: p[2] }) }).join('') + '<div class="pop-sep"></div>' + pi('help', IC.doc, '模式说明'), { width: 300, onPick: function (v) {
+      if (v === 'help') { soon('模式说明'); return }
+      STATE.preset = v; syncComposer()
+    } })
+  }
+  function permMenu(btn) {
+    openPop(btn, '<div class="pop-h"><span>权限 / ACCESS</span></div>' + Object.keys(PERM).map(function (k) { var P = PERM[k]; return pi(k, P.ic, P.t + (P.exp ? ' <span class="aux" style="color:var(--accent-ink)">实验</span>' : ''), { check: STATE.perm === k, desc: P.d }) }).join(''), { width: 320, onPick: function (v) { setPerm(v) } })
+  }
+  function wsMenu(btn) {
+    openPop(btn, '<div class="pop-h"><span>工作区 / WORKSPACE</span></div>' + WS.filter(function (w) { return w.name !== '未分组' }).map(function (w) { return pi(w.name, IC.folder, w.name, { check: STATE.ws === w.name, aux: w.sessions.length + ' 会话' }) }).join('') + '<div class="pop-sep"></div>' + pi('other', IC.search, '选择其他文件夹…'), { width: 260, onPick: function (v) {
+      if (v === 'other') { soon('文件夹选择器'); return }
+      STATE.ws = v; syncComposer()
+    } })
+  }
+  function attachMenu(btn) {
+    openPop(btn, pi('file', IC.file, '上传文件', { kbd: '⌘ U' }) + pi('image', IC.image, '添加图片') + pi('ref', IC.at, '引用文件或会话', { kbd: '@' }), { prefer: 'up', onPick: function (v) {
+      if (v === 'ref') { input.value += '@'; input.focus(); input.dispatchEvent(new Event('input')); return }
+      soon(v === 'file' ? '文件上传' : '图片上传')
+    } })
+  }
+  function skillMenu(btn) {
+    openPop(btn, '<div class="pop-h"><span>加载技能 / SKILLS</span></div><label class="pop-search">' + IC.search + '<input type="search" placeholder="搜索技能…" aria-label="搜索技能"></label>' +
+      SKILLS.map(function (s) { return pi(s[0], null, s[0], { check: STATE.skills.indexOf(s[0]) !== -1, desc: s[1], search: s[0] + s[1] }) }).join('') + '<div class="pop-empty" hidden>没有匹配的技能。</div>', { prefer: 'up', width: 260, onPick: function (v) {
+      var i = STATE.skills.indexOf(v); if (i === -1) STATE.skills.push(v); else STATE.skills.splice(i, 1)
+      syncComposer()
+    } })
+  }
+  function moreMenu(btn) {
+    var act = body.dataset.phase === 'active'
+    openPop(btn, pi('rename', IC.edit, '重命名会话', { disabled: !act }) + pi('log', IC.out, '导出 Session 日志', { disabled: !act }) + pi('finder', IC.finder, '在访达中显示') + '<div class="pop-sep"></div>' + pi('del', IC.trash, '删除会话', { danger: true, disabled: !act }), { align: 'end', onPick: function (v) {
+      if (v === 'rename') { renameSess('s43'); return }
+      if (v === 'del') { deleteSess('s43'); return }
+      soon(v === 'log' ? '日志导出' : '访达')
+    } })
+  }
+  function filterMenu(btn) {
+    openPop(btn, '<div class="pop-h"><span>排序</span></div>' + pi('sort:recent', null, '最近更新', { check: STATE.sort === 'recent' }) + pi('sort:name', null, '名称', { check: STATE.sort === 'name' }) +
+      '<div class="pop-sep"></div>' + pi('busy', null, '隐藏没有会话的工作区', { check: STATE.onlyBusy }), { width: 230, onPick: function (v) {
+      if (v === 'busy') STATE.onlyBusy = !STATE.onlyBusy; else STATE.sort = v.slice(5)
+      renderTree()
+    } })
+  }
+  function sessMenu(btn, sid) {
+    openPop(btn, pi('rename', IC.edit, '重命名') + pi('pin', IC.pin, '置顶') + pi('log', IC.out, '导出 Session 日志') + '<div class="pop-sep"></div>' + pi('del', IC.trash, '删除', { danger: true }), { width: 200, onPick: function (v) {
+      if (v === 'rename') renameSess(sid)
+      else if (v === 'del') deleteSess(sid)
+      else if (v === 'pin') { WS.forEach(function (w) { var i = w.sessions.findIndex(function (s) { return s[0] === sid }); if (i > 0) w.sessions.unshift(w.sessions.splice(i, 1)[0]) }); renderTree(); toast('已置顶') }
+      else soon('日志导出')
+    } })
+  }
+  function acctMenu(btn) {
+    openPop(btn, '<div class="pop-h"><span>138****0000</span><span>DEEPSEEK 账号</span></div>' + pi('settings', IC.gear, '设置', { kbd: '⌘ ,' }) + pi('feedback', IC.send, '意见反馈') + '<div class="pop-sep"></div>' + pi('logout', IC.exit, '退出登录'), { prefer: 'up', width: 240, onPick: function (v) {
+      if (v === 'settings') openSettings()
+      else if (v === 'logout') confirmDlg({ k: 'ACCOUNT', title: '退出登录？', body: '退出后本机会话保留，使用 DeepSeek 账号模型前需要重新登录。', ok: '退出登录', danger: true }).then(function (ok) { if (ok) toast('demo 不会真的退出') })
+      else soon('意见反馈')
+    } })
+  }
+  function findSess(sid) { for (var i = 0; i < WS.length; i++) { var j = WS[i].sessions.findIndex(function (s) { return s[0] === sid }); if (j !== -1) return [WS[i], j] } }
+  function renameSess(sid) {
+    var f = findSess(sid); if (!f) return
+    var row = document.querySelector('.sess[data-sid="' + sid + '"]'); if (!row) return
+    var sp = row.querySelector('span'), old = f[0].sessions[f[1]][1]
+    sp.innerHTML = '<input class="ren" aria-label="会话名称" value="' + esc(old) + '">'
+    var inp = sp.querySelector('input'); inp.focus(); inp.select()
+    var done = false
+    function commit(ok) {
+      if (done) return; done = true
+      var v = inp.value.trim()
+      if (ok && v) { f[0].sessions[f[1]][1] = v; if (sid === 's43' && body.dataset.phase === 'active') $('sessTitle').textContent = v }
+      renderTree()
+    }
+    inp.addEventListener('keydown', function (e) { e.stopPropagation(); if (e.key === 'Enter') commit(true); if (e.key === 'Escape') commit(false) })
+    inp.addEventListener('blur', function () { commit(true) })
+    inp.addEventListener('click', function (e) { e.stopPropagation() })
+  }
+  function deleteSess(sid) {
+    var f = findSess(sid); if (!f) return
+    var s = f[0].sessions[f[1]]
+    confirmDlg({ k: 'DELETE', title: '删除「' + s[1] + '」？', body: '会话记录和 Session 日志会一起删除，工作区里的文件不受影响。', ok: '删除会话', danger: true }).then(function (ok) {
+      if (!ok) return
+      var at = f[1]; f[0].sessions.splice(at, 1)
+      if (sid === 's43' && body.dataset.phase === 'active') resetChat()
+      renderTree()
+      toast('已删除会话', { label: 'DELETED', action: '撤销', ms: 4200, onAction: function () { f[0].sessions.splice(at, 0, s); renderTree() } })
+    })
+  }
+
+  /* ══ 设置页 ═══════════════════════════════════════════════════════ */
+  var SET = {
+    codeView: true, motionLow: false, accent: '#ff7500', uploadLog: false, webNew: false,
+    loop: { par: 8 }, sub: { depth: '2 层', par: 4 }, shell: { timeout: 120000, out: 1048576 },
+    startup: { enabled: true, mode: '每次会话', theme: 'light', speed: 1, interact: true, skip: true, name: 'JOYCE MOORE', id: '0087' },
+    plugins: { 'dsh-harness-os': true, 'dsh-startup-screen': true, '@smalltailqwq/dsh-client-ui-skin-maid-atelier': false }
+  }
+  var DEF = { loop: { par: 8 }, sub: { par: 4 }, shell: { timeout: 120000, out: 1048576 } }
+  var NAV = [
+    ['通用 / GENERAL', [['general', IC.gear, '通用设置'], ['appearance', IC.palette, '外观', 'SKIN'], ['account', IC.user, '账号']]],
+    ['智能体 / AGENT', [['models', IC.cube, '模型'], ['perm', IC.shield, '权限'], ['loop', IC.loop, 'Agent 循环'], ['sub', IC.tree, '子智能体']]],
+    ['工具 / TOOLS', [['shell', IC.term, '终端'], ['web', IC.globe, '网页搜索']]],
+    ['插件 / PLUGINS', [['inventory', IC.plug, '插件列表'], ['builtin', IC.list, '内置插件'], ['startup', IC.play, '启动动画', 'PLUGIN']]],
+    ['数据 / DATA', [['log', IC.doc, 'Session Log']]]
+  ]
+  function sw(key, on, label) { return '<button class="sw" role="switch" aria-checked="' + !!on + '" data-sw="' + key + '" aria-label="' + esc(label) + '"></button>' }
+  function row(title, desc, ctrl, ov) { return '<div class="set-row"><div class="l"><b>' + title + (ov ? '<span class="ov">已覆盖</span>' : '') + '</b>' + (desc ? '<small>' + desc + '</small>' : '') + '</div><div class="r">' + ctrl + '</div></div>' }
+  function grp(k, inner) { return '<div class="set-grp"><div class="k">' + k + '</div>' + inner + '</div>' }
+  function head(t, d) { return '<div class="set-h"><h3>' + t + '</h3>' + (d ? '<p>' + d + '</p>' : '') + '</div>' }
+  function numf(path, val, unit) { return '<label class="fld"><input inputmode="numeric" data-num="' + path + '" value="' + val + '" aria-label="' + path + '">' + (unit ? '<span class="u">' + unit + '</span>' : '') + '</label>' }
+  function pick(key, val) { return '<button class="pick" data-pick="' + key + '">' + esc(val) + IC.chev + '</button>' }
+  function saveBar(sec) { return '<div class="set-actions"><button class="btn primary sm" data-save="' + sec + '" disabled><span>保存</span></button><button class="btn sm" data-reset="' + sec + '"><span>恢复默认</span></button></div>' }
+  var PAGES = {
+    general: function () {
+      return head('通用设置', '版本、工作视图和配置文件。') +
+        grp('版本 / VERSION', row('当前版本：0.2.1-rc.1', '桌面端会在后台检查新版本。', '<button class="btn sm" data-act="update"><span>检查更新</span></button>')) +
+        grp('工作视图 / VIEW', row('显示代码工作视图', '开启后，显示轨迹、本轮代码差异，可选择完整的 Agent 预设切换。', sw('codeView', SET.codeView, '显示代码工作视图')) +
+          row('配置文件', '<span style="font-family:var(--mono)">~/.dsh/settings.yaml</span>', '<button class="btn sm" data-act="cfg"><span>打开配置文件</span></button>'))
+    },
+    appearance: function () {
+      var th = document.documentElement.getAttribute('data-theme')
+      return head('外观', 'Harness OS 皮肤的显示方式。皮肤由插件 dsh-harness-os 提供，卸载即还原 DSH 原生界面。') +
+        grp('主题 / THEME', row('配色', '和启动动画的暖白、暗色两套底板一致。', '<span class="seg"><button data-th="light" aria-pressed="' + (th === 'light') + '">暖白</button><button data-th="dark" aria-pressed="' + (th === 'dark') + '">暗色</button></span>') +
+          row('强调色', '阶段条、准星、运行状态用这一种颜色。', '<span class="swatches" role="radiogroup" aria-label="强调色">' + [['#ff7500', '橙'], ['#ff3b30', '信号红'], ['#2971b8', '冰蓝']].map(function (c) { return '<button role="radio" data-accent="' + c[0] + '" aria-checked="' + (SET.accent === c[0]) + '" data-tip="' + c[1] + '"><i style="background:' + c[0] + '"></i></button>' }).join('') + '</span>')) +
+        grp('动效 / MOTION', row('减弱动效', '关掉入场、面板与对话的过渡，只保留必要的状态变化。', sw('motionLow', SET.motionLow, '减弱动效')))
+    },
+    account: function () {
+      return head('账号', 'DeepSeek 账号用于官方模型与额度。') +
+        grp('DEEPSEEK 账号', '<div class="prov"><span class="ic">' + IC.user + '</span><span><b>138****0000</b><small>手机号登录</small></span><span class="chip-st ok">已登录</span><button class="btn sm" data-act="logout"><span>退出登录</span></button></div>' +
+          row('可用额度', '<span style="font-family:var(--mono)">¥ 42.80</span>', '<button class="btn sm" data-act="topup"><span>去充值</span></button>'))
+    },
+    models: function () {
+      return head('模型', '填入各提供商的 API 密钥即可使用其模型。') +
+        grp('提供商 / PROVIDERS',
+          '<div class="prov"><span class="ic">DS</span><span><b>DeepSeek 账号</b><small>DeepSeek-V4-Pro · DeepSeek-V4-Flash</small></span><span class="chip-st ok">已登录</span><button class="btn sm" data-act="edit"><span>编辑</span></button></div>' +
+          '<div class="prov"><span class="ic">A</span><span><b>Anthropic</b><small>Claude-Opus-5.5</small></span><span class="chip-st bad">API 密钥缺失</span><button class="btn sm" data-act="edit"><span>编辑</span></button></div>') +
+        '<div class="set-actions"><button class="btn sm" data-act="addprov"><span>添加模型提供商</span></button></div>'
+    },
+    perm: function () {
+      return head('权限', '选择新会话的默认权限模式。当前会话可在输入框的权限菜单里单独切换。') +
+        '<div class="opt-cards" role="radiogroup" aria-label="默认权限">' + Object.keys(PERM).map(function (k) { var P = PERM[k]; return '<button class="opt-card" role="radio" data-perm="' + k + '" aria-checked="' + (STATE.perm === k) + '"><span class="box"></span><span><b>' + P.t + (P.exp ? '<span class="exp">实验</span>' : '') + '</b><small>' + P.d + '</small></span></button>' }).join('') + '</div>'
+    },
+    loop: function () {
+      return head('Agent 循环', '控制 Agent 派发工具调用的方式。') +
+        grp('并行 / PARALLEL', row('并行工具调用数', '同一步内最多同时运行多少个可并行的调用。', numf('loop.par', SET.loop.par), SET.loop.par !== DEF.loop.par)) + saveBar('loop')
+    },
+    sub: function () {
+      return head('子智能体', '设置子智能体的递归层级、数量和模型。') +
+        grp('运行限制 / LIMITS', row('最大递归深度', '限制 Agent 创建子智能体的递归层级。如果某个工具单独设置了最大递归深度，以该工具的设置为准。', pick('sub.depth', SET.sub.depth)) +
+          row('子智能体并行数量上限', '同一主 Agent 下，所有递归层级同时存活的子智能体总数，主 Agent 不计入。', numf('sub.par', SET.sub.par), SET.sub.par !== DEF.sub.par)) + saveBar('sub')
+    },
+    shell: function () {
+      return head('终端', '限制每条命令最多能跑多久、最多输出多少内容。') +
+        grp('命令 / COMMAND', row('命令超时', '单条命令允许运行多久，超时即终止。', numf('shell.timeout', SET.shell.timeout, 'ms'), SET.shell.timeout !== DEF.shell.timeout) +
+          row('单流输出上限', '超出部分会转存到临时文件，而不是被丢弃。', numf('shell.out', SET.shell.out, 'B'), SET.shell.out !== DEF.shell.out)) + saveBar('shell')
+    },
+    web: function () {
+      return head('网页搜索', '设置 DeepSeek 的搜索提供方。') +
+        grp('提供方 / PROVIDER', row('启用新版 Web 搜索 API', '默认关闭，搜索通过 DeepSeek Messages 完成。', sw('webNew', SET.webNew, '启用新版 Web 搜索 API')) +
+          row('API 密钥', '不写入设置文件。留空表示保持当前密钥。', '<label class="fld"><input class="wide" type="password" placeholder="sk-…" aria-label="API 密钥"></label>') +
+          row('Messages API 基础地址', '填写含 API 前缀的地址；程序追加 /messages，留空恢复默认。', '<label class="fld"><input class="wide" placeholder="https://api.deepseek.com/anthropic/v1" aria-label="Messages API 基础地址"></label>'))
+    },
+    inventory: function () {
+      var G = [['dsh-harness-os', '0.1.0 · Harness OS 主界面皮肤', 'skin'], ['dsh-startup-screen', '1.6.0-hos.1 · 启动动画（fork）'], ['@smalltailqwq/dsh-client-ui-skin-maid-atelier', '0.1.8 · 深海女仆工坊皮肤', 'skin']]
+      return head('插件列表', '全局插件由系统与所有会话共用；会话插件由 Agent 预设按会话组成。') +
+        '<label class="set-search">' + IC.search + '<input type="search" placeholder="搜索插件" aria-label="搜索插件" data-plugsearch></label>' +
+        grp('全局插件 / GLOBAL', G.map(function (g) { var on = SET.plugins[g[0]]; return '<div class="plug" data-pname="' + g[0] + '"><span><b>' + g[0] + '</b><small>' + g[1] + '</small></span><span class="chip-st ' + (on ? 'ok' : 'mu') + '">' + (on ? '已启用' : '已停用') + '</span>' + sw('plug:' + g[0], on, '启用 ' + g[0]) + '</div>' }).join('')) +
+        grp('会话插件 / SESSION', '<div class="plug" data-pname="dsh-tool-todo"><span><b>@deepseek-ai/dsh-tool-todo</b><small>标准模式 · PTC 模式</small></span><span class="chip-st on">预设中启用</span><span></span></div><div class="plug" data-pname="dsh-subagent"><span><b>@deepseek-ai/dsh-subagent</b><small>标准模式</small></span><span class="chip-st on">条件启用</span><span></span></div>') +
+        '<div class="set-note" data-plugempty hidden>没有匹配的插件。</div><div class="set-note">两套皮肤互斥：启用一个会停用另一个。</div>'
+    },
+    builtin: function () {
+      return head('内置插件', '查看内置部署的插件列表。内置插件随 DSH 更新，不能单独停用。') +
+        grp('内置 / BUILTIN', ['dsh-web-app', 'dsh-client-ui-sidebar', 'dsh-client-ui-sidebar-right', 'dsh-client-ui-conversation', 'dsh-client-ui-model-selection', 'dsh-client-ui-permission-presets', 'dsh-client-ui-deliverables', 'dsh-tool-todo'].map(function (n) { return '<div class="plug"><span><b>@deepseek-ai/' + n + '</b></span><span class="chip-st mu">内置</span><span></span></div>' }).join(''))
+    },
+    startup: function () {
+      var S = SET.startup
+      return head('启动动画', '由插件 dsh-startup-screen 提供。改完点「立即预览」，会按新设置重播一次。') +
+        grp('播放 / PLAYBACK', row('启用', '关掉就完全不播。', sw('st.enabled', S.enabled, '启用启动动画')) +
+          row('显示模式', '每次会话播一次 / 每次刷新都播 / 一天一次。', pick('st.mode', S.mode)) +
+          row('主题', '暖白是参考片原色。', '<span class="seg"><button data-sttheme="light" aria-pressed="' + (S.theme === 'light') + '">暖白</button><button data-sttheme="dark" aria-pressed="' + (S.theme === 'dark') + '">暗色</button></span>') +
+          row('速度', '整段动画的快慢，0.35 – 3 倍。', '<label class="fld"><input data-st="speed" value="' + S.speed + '" aria-label="速度"><span class="u">×</span></label>') +
+          row('要求确认', '第 1、2 步是否等你点按钮才继续。', sw('st.interact', S.interact, '要求确认')) +
+          row('允许跳过', '显示右上角跳过按钮，响应 Esc。', sw('st.skip', S.skip, '允许跳过'))) +
+        grp('身份资料 / IDENTITY', row('身份名称', '终幕「欢迎 xxx 访问」里的名字。', '<label class="fld"><input class="wide" data-st="name" value="' + esc(S.name) + '" aria-label="身份名称" style="width:180px"></label>') +
+          row('身份编号', '第二步身份卡上的编号。', '<label class="fld"><input data-st="id" value="' + esc(S.id) + '" aria-label="身份编号"></label>')) +
+        '<div class="set-actions"><button class="btn primary" data-act="preview"><span>立即预览</span></button></div>'
+    },
+    log: function () {
+      return head('Session Log', '会话日志只在本机保存，除非你选择上传。') +
+        grp('上传 / UPLOAD', row('在使用官方模型 API 时上传 Session Log', '帮助改进 DeepSeek 模型与产品。', sw('uploadLog', SET.uploadLog, '上传 Session Log')))
+    }
+  }
+  var setMd = null, setCur = 'general'
+  function openSettings(sec) {
+    closePop()
+    if (setMd) { renderSet(sec || setCur); return }
+    setMd = openModal('<div class="set-top"><h2>设置</h2><span class="en">SETTINGS</span><span class="sp"></span><span class="ver">REV 0.2.1-rc.1</span><button class="icon-btn" data-close-set aria-label="关闭设置" data-kbd="Esc">' + SVG('<path d="M6 6l12 12M18 6 6 18"/>') + '</button></div>' +
+      '<div class="set-main"><nav class="set-nav" aria-label="设置分组"></nav><div class="set-body"></div></div>', 'settings', function () { setMd = null })
+    var el = setMd.el
+    el.querySelector('[data-close-set]').addEventListener('click', function () { setMd.close(); setMd = null })
+    el.querySelector('.set-nav').addEventListener('click', function (e) { var b = e.target.closest('[data-sec]'); if (b) renderSet(b.dataset.sec) })
+    el.querySelector('.set-body').addEventListener('click', onSetClick)
+    el.querySelector('.set-body').addEventListener('input', onSetInput)
+    renderSet(sec || setCur)
+  }
+  function renderSet(sec) {
+    setCur = sec
+    var el = setMd.el
+    el.querySelector('.set-nav').innerHTML = NAV.map(function (g) { return '<div class="g">' + g[0] + '</div>' + g[1].map(function (n) { return '<button data-sec="' + n[0] + '"' + (n[0] === sec ? ' aria-current="true"' : '') + '>' + n[1] + '<span>' + n[2] + '</span>' + (n[3] ? '<span class="tag">' + n[3] + '</span>' : '') + '</button>' }).join('') }).join('')
+    var b = el.querySelector('.set-body'); b.innerHTML = '<div class="in">' + PAGES[sec]() + '</div>'; b.scrollTop = 0
+    var on = el.querySelector('.set-nav [aria-current]'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }
+  function applyAccent(c) {
+    SET.accent = c
+    var root = document.documentElement
+    if (c === '#ff7500') { root.style.removeProperty('--accent'); root.style.removeProperty('--accent-ink') }
+    else { root.style.setProperty('--accent', c); root.style.setProperty('--accent-ink', c) }
+  }
+  function onSetClick(e) {
+    var t
+    if ((t = e.target.closest('[data-sw]'))) {
+      var k = t.dataset.sw, on = t.getAttribute('aria-checked') !== 'true'
+      t.setAttribute('aria-checked', String(on))
+      if (k.indexOf('plug:') === 0) {
+        var name = k.slice(5); SET.plugins[name] = on
+        var skins = ['dsh-harness-os', '@smalltailqwq/dsh-client-ui-skin-maid-atelier']
+        if (on && skins.indexOf(name) !== -1) skins.forEach(function (s) { if (s !== name) SET.plugins[s] = false })
+        renderSet('inventory'); toast(on ? '已启用 ' + name + '，重启 DSH 后生效' : '已停用 ' + name, { label: 'PLUGIN' }); return
+      }
+      if (k.indexOf('st.') === 0) { SET.startup[k.slice(3)] = on; return }
+      SET[k] = on
+      if (k === 'motionLow') document.documentElement.classList.toggle('no-motion', on)
+      toast('设置已保存', { label: 'SAVED', ms: 1600 }); return
+    }
+    if ((t = e.target.closest('[data-th]'))) { document.documentElement.setAttribute('data-theme', t.dataset.th); try { localStorage.setItem('hos-theme', t.dataset.th) } catch (er) {} renderSet('appearance'); return }
+    if ((t = e.target.closest('[data-accent]'))) { applyAccent(t.dataset.accent); renderSet('appearance'); return }
+    if ((t = e.target.closest('[data-sttheme]'))) { SET.startup.theme = t.dataset.sttheme; renderSet('startup'); return }
+    if ((t = e.target.closest('[data-perm]'))) { setPerm(t.dataset.perm).then(function () { if (setMd) renderSet('perm') }); return }
+    if ((t = e.target.closest('[data-pick]'))) {
+      var key = t.dataset.pick
+      var opts = key === 'sub.depth' ? ['禁用子智能体', '仅允许主 Agent 创建子智能体', '2 层', '3 层'] : ['每次会话', '总是', '每天']
+      var cur = key === 'sub.depth' ? SET.sub.depth : SET.startup.mode
+      openPop(t, opts.map(function (o) { return pi(o, null, o, { check: o === cur }) }).join(''), { align: 'end', onPick: function (v) {
+        if (key === 'sub.depth') { SET.sub.depth = v; renderSet('sub'); markDirty('sub') } else { SET.startup.mode = v; renderSet('startup') }
+      } })
+      return
+    }
+    if ((t = e.target.closest('[data-save]'))) { t.disabled = true; toast('已保存', { label: 'SAVED', ms: 1600 }); return }
+    if ((t = e.target.closest('[data-reset]'))) { var s = t.dataset.reset; Object.keys(DEF[s]).forEach(function (k2) { SET[s][k2] = DEF[s][k2] }); if (s === 'sub') SET.sub.depth = '2 层'; renderSet(s); toast('已恢复默认值', { ms: 1600 }); return }
+    if ((t = e.target.closest('[data-act]'))) {
+      var a = t.dataset.act
+      if (a === 'update') { t.disabled = true; t.querySelector('span').textContent = '正在检查更新…'; setTimeout(function () { t.disabled = false; t.querySelector('span').textContent = '检查更新'; toast('已是最新版本', { label: 'UPDATE' }) }, 1200) }
+      else if (a === 'preview') previewSplash()
+      else if (a === 'addprov') openPop(t, pi('third', IC.cube, '第三方模型提供商', { desc: '从内置目录中选择 OpenAI、Anthropic、Kimi 等提供商，填入其 API 密钥即可使用。' }) + pi('custom', IC.term, '自定义模型 API', { desc: '连接中转站、自部署服务或其他兼容 OpenAI / Anthropic 协议的接口。' }), { width: 320, onPick: function () { soon('提供商表单') } })
+      else if (a === 'logout') acctMenu($('acct'))
+      else soon({ cfg: '打开配置文件', topup: '充值', edit: '提供商编辑' }[a] || '这一项')
+    }
+  }
+  function markDirty(sec) { var b = setMd && setMd.el.querySelector('[data-save="' + sec + '"]'); if (b) b.disabled = false }
+  function onSetInput(e) {
+    var t = e.target
+    if (t.dataset.num) { var p = t.dataset.num.split('.'), n = Number(t.value); if (t.value !== '' && !isNaN(n)) SET[p[0]][p[1]] = n; markDirty(p[0]); var ov = t.closest('.set-row').querySelector('.ov'); var isOv = SET[p[0]][p[1]] !== DEF[p[0]][p[1]]; if (isOv && !ov) t.closest('.set-row').querySelector('.l b').insertAdjacentHTML('beforeend', '<span class="ov">已覆盖</span>'); if (!isOv && ov) ov.remove() }
+    if (t.dataset.st) SET.startup[t.dataset.st] = t.dataset.st === 'speed' ? Math.min(3, Math.max(.35, Number(t.value) || 1)) : t.value
+    if (t.hasAttribute('data-plugsearch')) {
+      var q = t.value.trim().toLowerCase(), n2 = 0
+      setMd.el.querySelectorAll('.plug[data-pname]').forEach(function (r) { var hit = !q || r.dataset.pname.toLowerCase().indexOf(q) !== -1; r.hidden = !hit; if (hit) n2++ })
+      setMd.el.querySelector('[data-plugempty]').hidden = n2 > 0
+    }
+  }
+  function previewSplash() {
+    var S = SET.startup, C = window.__DSH_STARTUP__
+    C.mode = 'always'; C.speed = S.speed; C.requireInteraction = S.interact; C.allowSkip = S.skip; C.identity = S.name || 'JOYCE MOORE'; C.identityId = S.id
+    if (setMd) { setMd.close(); setMd = null }
+    var keep = document.documentElement.getAttribute('data-theme')
+    if (S.theme !== keep) { document.documentElement.setAttribute('data-theme', S.theme) }
+    $('dReplay').click()
+  }
+
+  /* ══ 接线 ═══════════════════════════════════════════════════════════ */
+  document.querySelector('.model').addEventListener('click', function (e) { modelMenu(e.currentTarget) })
+  $('chipPreset').addEventListener('click', function (e) { presetMenu(e.currentTarget) })
+  $('chipPerm').addEventListener('click', function (e) { permMenu(e.currentTarget) })
+  $('chipWs').addEventListener('click', function (e) { wsMenu(e.currentTarget) })
+  $('chipSkills').addEventListener('click', function (e) { var b = e.target.closest('[data-skill]'); if (b) { STATE.skills.splice(STATE.skills.indexOf(b.dataset.skill), 1); syncComposer() } })
+  $('btnAttach').addEventListener('click', function (e) { attachMenu(e.currentTarget) })
+  $('btnSkill').addEventListener('click', function (e) { skillMenu(e.currentTarget) })
+  $('btnMore').addEventListener('click', function (e) { moreMenu(e.currentTarget) })
+  $('btnFilter').addEventListener('click', function (e) { filterMenu(e.currentTarget) })
+  $('btnAddWs').addEventListener('click', function () { soon('文件夹选择器') })
+  $('acct').addEventListener('click', function (e) { acctMenu(e.currentTarget) })
+  document.querySelector('.hos-nav').addEventListener('click', function (e) {
+    var b = e.target.closest('.nav-item'); if (!b) return
+    var k = b.dataset.nav
+    if (k === 'plugins') openSettings('inventory'); else soon(k === 'market' ? '插件市场' : '自动化任务')
+  })
+  $('tree').addEventListener('click', function (e) {
+    var m = e.target.closest('.more'); if (!m) return
+    e.stopPropagation(); sessMenu(m, m.closest('.sess').dataset.sid)
+  }, true)
+  document.querySelector('.dock-strip [aria-label="分栏"]').addEventListener('click', function () { soon('分栏') })
+  document.addEventListener('keydown', function (e) {
+    var mod = e.metaKey || e.ctrlKey
+    if (mod && e.key === ',') { e.preventDefault(); openSettings() }
+    if (mod && e.key.toLowerCase() === 'b' && !e.altKey) { e.preventDefault(); toggleSide() }
+  })
+  syncComposer()
+
+  renderTodos(0, false)
+  $('dDock').addEventListener('click', function () { if (dockOpen()) closeDock(); else openDock() })
+})()
+</script>
+</body>
+</html>

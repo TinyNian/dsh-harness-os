@@ -1,0 +1,10 @@
+{
+  "name": "dsh-harness-os-monorepo",
+  "private": true,
+  "description": "Harness OS：DeepSeek Harness 主界面皮肤 + fork 的开机动画",
+  "license": "MIT",
+  "scripts": {
+    "test": "node packages/dsh-harness-os/test/smoke.mjs && npm --prefix packages/dsh-startup-screen test",
+    "demo": "python3 -m http.server 8080"
+  }
+}
