@@ -258,6 +258,8 @@ window.__ModuleLoader__.load({
 
     /* ── 4. 空会话页（hero）与输入卡 ──────────────────────────────────── */
     var CV = B + ' [data-slot="main.conversation"]'
+    var TC = CV + ' [data-chat-flow-kind=tool-call]', TV = TC + ' [data-slot="tool.call.toolview"]', ROW = TC + ' [data-expandable=true]'
+    var RUN = CV + ' [data-chat-running=true][data-hos-run]'
     var HERO = [
       CV + ' ' + C('composerHero') + ' ' + C('headline') + '{position:relative;flex-direction:column;align-items:center;gap:0;padding:56px 0 40px}',
       CV + ' ' + C('composerHero') + ' ' + C('fishHitbox') + '{display:none}',
@@ -299,7 +301,10 @@ window.__ModuleLoader__.load({
       /* 第三方 dsh-input-traffic 用自己的排队栏（[data-steer-dock]）替换官方那条：原生是 bg-layer-1 米色底 + 四边圆角框，
          同样做成贴在输入卡上方的玻璃切角卡（只认属性和结构，不认它带哈希的类名） */
       B + ' [data-steer-dock] > div{--hos-cl:var(--hos-hair);border:1px solid var(--hos-cl)!important;border-bottom:0!important;border-radius:0!important;background:' + cutTR(10) + ',linear-gradient(180deg,var(--hos-glass-hi),transparent 70%),var(--hos-glass)!important;box-shadow:none!important;-webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}',
+      /* 运行中没有排队消息时它也会显示标题栏，下面挂一个空列表（上下 4px 内边距）和标题栏下边线，看着像和输入卡断开了 */
       B + ' [data-steer-dock] > div > :first-child{border-bottom-color:var(--hos-hair-soft)!important}',
+      B + ' [data-steer-dock] > div > ul:empty{display:none}',
+      B + ' [data-steer-dock] > div > :first-child:not(:has(~ :not(:empty))){border-bottom-color:transparent!important}',
       /* 输入框座位的淡出渐变：原生在暗色下渐变到写死的中性灰，改成渐变到底板色 */
       CV + ' ' + C('composerSeat') + '{background:none!important;isolation:isolate}',
       CV + ' [data-content-phase=active] ' + C('composerSeat') + '::before{content:"";position:absolute;left:0;right:0;top:-24px;bottom:0;z-index:-1;pointer-events:none;background:' + BRUSH + ',radial-gradient(120% 90% at 78% 12%,rgba(255,255,255,.85) 0%,rgba(255,255,255,0) 55%),linear-gradient(168deg,var(--hos-bg-2) 0%,var(--hos-bg) 42%,var(--hos-bg) 100%);background-size:420px 420px,100vw 100vh,100vw 100vh;background-repeat:repeat,no-repeat,no-repeat;background-attachment:scroll;background-position:var(--hos-seat-x,0) var(--hos-seat-y,0);background-blend-mode:overlay,normal,normal;-webkit-mask-image:linear-gradient(transparent,#000 30px);mask-image:linear-gradient(transparent,#000 30px)}',
@@ -338,6 +343,45 @@ window.__ModuleLoader__.load({
       CV + ' [data-state=running] [data-disclosure-row] ' + C('title') + '{color:var(--hos-accent-ink)!important}',
       CV + ' [data-chat-flow-kind=tool-call] [data-disclosure-row]{border-bottom:1px solid var(--hos-hair-soft)}',
       CV + ' [data-chat-flow-kind=tool-call] [data-disclosure-row]:hover{background:var(--hos-hair-soft)}',
+      /* ── 工具调用：照 demo 的工具行（菱形 / 闪烁标记 + 等宽动词 + 目标），结果块去掉原生灰底，改成虚线引出 ── */
+      TV + '{--dsw-alias-markdown-code-block:transparent;--dsw-alias-markdown-code-block-banner:transparent;--dsw-alias-bg-base:transparent}',
+      ROW + '{gap:10px;padding-top:7px;padding-bottom:7px;border-bottom:1px solid var(--hos-hair-soft);font-family:var(--hos-mono);font-size:11.5px;letter-spacing:.04em}',
+      ROW + ':hover{background:var(--hos-hair-soft)}',
+      ROW + ' ' + C('title') + '{min-width:62px;margin-right:10px;font-family:var(--hos-mono)!important;font-size:10px!important;letter-spacing:.22em;color:var(--hos-muted)!important}',
+      ROW + ' :is(' + C('summary') + ',' + C('summary') + ' *,' + C('fileLink') + '){font-family:var(--hos-mono);color:var(--hos-ink)}',
+      ROW + ' ' + C('sep') + '{display:none}',
+      ROW + ' ' + C('leading') + '{display:inline-flex;align-items:center;justify-content:center;flex:none;width:16px}',
+      ROW + ' ' + C('leading') + ' > *{display:none}',
+      ROW + ' ' + C('leading') + '::before{content:"";width:6px;height:6px;background:var(--hos-ink);transform:rotate(45deg)}',
+      TC + ' :is([data-state=running] [data-expandable=true],[data-expandable=true][data-state=running]) ' + C('leading') + '::before{width:7px;height:7px;transform:none;border-radius:50%!important;background:var(--hos-accent);animation:hos-blink 1.1s steps(2) infinite}',
+      TC + ' :is([data-state=error] [data-expandable=true],[data-expandable=true][data-state=error]) ' + C('leading') + '::before{background:var(--hos-red)}',
+      TC + ' :is([data-state=running] [data-expandable=true],[data-expandable=true][data-state=running]) ' + C('title') + '{color:var(--hos-accent-ink)!important}',
+      TV + ' :is([data-body],[data-search],[data-inspect]){margin-left:7px;padding-left:12px;border:0!important;border-left:1px dashed var(--hos-hair)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-family:var(--hos-mono);font-size:11px;color:var(--hos-ink-soft)}',
+      TV + ' :is(' + C('inspectButton') + ',' + C('copyButton') + '){border:1px solid var(--hos-hair)!important;border-radius:0!important;background:transparent!important;font-family:var(--hos-mono);font-size:10px;letter-spacing:.16em;color:var(--hos-muted)}',
+      TV + ' :is(' + C('inspectButton') + ',' + C('copyButton') + '):hover{border-color:var(--hos-ink)!important;color:var(--hos-ink)}',
+      /* 思考行：中文标题 + REASONING，展开内容用虚线引出 */
+      CV + ' [data-variant=think]{--dsw-alias-bg-base:transparent}',
+      CV + ' [data-variant=think] [data-disclosure-row] ' + C('title') + '{font-family:inherit!important;font-size:12.5px!important;letter-spacing:0;color:var(--hos-ink-soft)!important}',
+      CV + ' [data-variant=think] [data-disclosure-row] ' + C('title') + '::after{content:"REASONING";margin-left:10px;font-family:var(--hos-mono);font-size:9.5px;letter-spacing:.26em;color:var(--hos-muted)}',
+      CV + ' [data-variant=think] ' + C('thinkBody') + '{margin:8px 0 0 5px;padding:2px 0 2px 16px;border-left:1px dashed var(--hos-hair);color:var(--hos-muted)}',
+      /* 完成行：COMPLETE 1s · 6 TOOLS（状态词由脚本按原生文字打在 data-hos-status 上，认不出时保持原文） */
+      CV + ' [data-turn-process][data-hos-status]{display:inline-flex;align-items:center;gap:8px;font-family:var(--hos-mono);font-size:10px;letter-spacing:.3em;color:var(--hos-muted)}',
+      CV + ' [data-turn-process][data-hos-status] ' + C('label') + '{display:inline-flex;align-items:baseline;gap:8px;font-size:0;letter-spacing:0}',
+      CV + ' [data-turn-process][data-hos-status] ' + C('label') + '::before{content:"COMPLETE";font-size:10px;letter-spacing:.3em}',
+      CV + ' [data-turn-process][data-hos-status=stopped] ' + C('label') + '::before{content:"STOPPED"}',
+      CV + ' [data-turn-process][data-hos-status=failed] ' + C('label') + '::before{content:"FAILED";color:var(--hos-red)}',
+      CV + ' [data-turn-process][data-hos-status] ' + C('durationNumber') + '{font-size:10px;letter-spacing:.1em;color:var(--hos-accent-ink);font-variant-numeric:tabular-nums}',
+      CV + ' [data-turn-process][data-hos-status] ' + C('durationNumber') + '::after{content:"s"}',
+      CV + ' [data-turn-process][data-hos-status]:not([data-turn-process-tool-calls="0"])::after{content:"· " attr(data-turn-process-tool-calls) " TOOLS";order:1}',
+      CV + ' [data-turn-process][data-hos-status] > svg{order:2}',
+      /* 运行中行：转圈 + 状态词 + EXECUTING + 秒数（原生整句是一个文本节点，脚本每秒解析后写进变量） */
+      RUN + ' ' + C('runningContent') + '{display:inline-flex;align-items:center;gap:12px;font-family:var(--hos-mono);font-size:10px;letter-spacing:.3em;color:var(--hos-muted)}',
+      RUN + ' ' + C('runningContent') + '::before{content:"";flex:none;box-sizing:border-box;width:16px;height:16px;border:2px solid var(--hos-hair);border-top-color:var(--hos-accent);border-radius:50%!important;animation:hos-spin 1.2s linear infinite}',
+      RUN + ' ' + C('runningText') + '{display:inline-flex;align-items:center;gap:12px;font-size:0!important;background:none!important;-webkit-text-fill-color:currentColor}',
+      RUN + ' ' + C('runningText') + ' > *,' + RUN + ' ' + C('runningContent') + ' > :not(' + C('runningText') + '){display:none!important}',
+      RUN + ' ' + C('runningText') + '::before{content:var(--hos-run-zh,"");font-size:12px;letter-spacing:.3em;color:var(--hos-ink-soft)}',
+      RUN + ' ' + C('runningText') + '::after{content:"EXECUTING";font-size:10px;letter-spacing:.3em}',
+      RUN + ' ' + C('runningContent') + '::after{content:var(--hos-run-t,"");color:var(--hos-accent-ink);font-variant-numeric:tabular-nums}',
       CV + ' pre,' + CV + ' code{font-family:var(--hos-mono)}',
       CV + ' :is(pre,[class*="codeBlock"]){border:1px solid var(--hos-hair)}',
       /* 代码卡片：外框包住语言栏和代码区，代码区只留和语言栏之间的分隔线 */
@@ -632,11 +676,30 @@ window.__ModuleLoader__.load({
         var s = makeReticle(); s.setAttribute('class', 'hos-guide-ret'); h.appendChild(s)
       })
     }
+    /* 运行中 / 完成两行的状态词：原生是整句文字，解析后写进属性和变量，交给 CSS 按 demo 版式显示；认不出就保持原文 */
+    function syncTurn() {
+      var runs = document.querySelectorAll('[data-slot="main.conversation"] [data-chat-running=true]')
+      for (var i = 0; i < runs.length; i++) {
+        var txt = runs[i].querySelector(C('runningText'))
+        var m = txt && /^\s*([^，,\d]+?)[，,]\s*用时\s*(\d+)\s*秒/.exec(txt.textContent)
+        if (m) {
+          runs[i].setAttribute('data-hos-run', '')
+          runs[i].style.setProperty('--hos-run-zh', JSON.stringify(m[1].trim()))
+          runs[i].style.setProperty('--hos-run-t', JSON.stringify(pad(+m[2]) + 's'))
+        } else runs[i].removeAttribute('data-hos-run')
+      }
+      var tps = document.querySelectorAll('[data-slot="main.conversation"] button[data-turn-process]')
+      for (var j = 0; j < tps.length; j++) {
+        var lb = tps[j].querySelector(C('label')), t = lb ? lb.textContent : ''
+        var st = /^已完成/.test(t) ? 'done' : /^(已停止|已中断|已取消)/.test(t) ? 'stopped' : /^(失败|出错)/.test(t) ? 'failed' : ''
+        if (st && tps[j].querySelector(C('durationNumber'))) tps[j].setAttribute('data-hos-status', st); else tps[j].removeAttribute('data-hos-status')
+      }
+    }
     var raf = 0
     function ensure() {
       raf = 0
       if (!document.body.hasAttribute('data-hos')) return
-      ensureSys(); ensureHero(); ensureGuide(); watchSplash(); watchFrame(); syncSide()
+      ensureSys(); ensureHero(); ensureGuide(); watchSplash(); watchFrame(); syncSide(); syncTurn()
     }
     function schedule() { if (!raf) raf = requestAnimationFrame(ensure) }
 
@@ -662,6 +725,7 @@ window.__ModuleLoader__.load({
       }
       drawTrace()
       syncSide()
+      syncTurn()
     }
     /* 侧栏收起时品牌块要让位（macOS 收起会整列隐藏、DSH 把收起按钮放进顶栏）。
        侧栏节点会被替换，所以不用 ResizeObserver，每次 ensure / tick / resize 都量一次。 */
@@ -831,6 +895,7 @@ window.__ModuleLoader__.load({
       if (chrome) chrome.remove(); chrome = null
       document.querySelectorAll('.hos-sys,.hos-hero-en,.hos-hero-rule,.hos-reticle,.hos-trace,.hos-guide-ret').forEach(function (n) { n.remove() })
       tracePaths = []
+      document.querySelectorAll('[data-hos-run],[data-hos-status]').forEach(function (n) { n.removeAttribute('data-hos-run'); n.removeAttribute('data-hos-status') })
       ;['data-hos', 'data-hos-chassis', 'data-hos-motion', 'data-hos-phase'].forEach(function (a) { document.body.removeAttribute(a) })
       ;['--hos-logo-pad', '--hos-logo-h', '--hos-cut', '--hos-seat-x', '--hos-seat-y', '--hos-brand-clip'].forEach(function (v) { document.body.style.removeProperty(v) })
     }
