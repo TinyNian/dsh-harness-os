@@ -54,6 +54,9 @@ dsh plugin --profile desktop add "github:TinyNian/dsh-harness-os#path:packages/d
 
 **Web**：把 `--profile desktop` 换成 `--profile web`，装完重启 `dsh web`。
 
+**锁定版本**：上面两条装的是 `main` 上的最新代码。想停在某个发布版本，就在 `#` 后面加上标签，例如 `"github:TinyNian/dsh-harness-os#v0.2.0&path:packages/dsh-harness-os"`。
+各版本的更新内容和安装包见 [Releases](https://github.com/TinyNian/dsh-harness-os/releases)，完整记录在 [CHANGELOG.md](CHANGELOG.md)。
+
 > macOS 桌面端自带的命令行在 `/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh`，版本和桌面端一致。
 
 只想要皮肤、不要开机动画也可以，只装第二条。没有开机动画时皮肤直接停在收起态。
@@ -85,7 +88,8 @@ dsh plugin --profile desktop remove dsh-startup-screen
 │  ├─ dsh-harness-os/       主界面皮肤（client.js 手写 ModuleLoader bundle，无需构建）
 │  └─ dsh-startup-screen/   开机动画（fork，FORK.md 记录来源和改动）
 ├─ demo/                    可交互的 HTML demo：开机动画 → 主界面 → 对话 / 右侧栏 / 设置页
-└─ docs/screenshots/
+├─ docs/screenshots/
+└─ CHANGELOG.md             各版本更新记录
 ```
 
 ## 开发
