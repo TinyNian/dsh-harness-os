@@ -141,6 +141,7 @@ window.__ModuleLoader__.load({
        斜线抗锯齿后看着比直边淡，宽度给 1.2px 补回来 */
     function cutTR(px) { return 'linear-gradient(to top right,transparent calc(50% - 1.2px),var(--hos-cl) calc(50% - 1.2px),var(--hos-cl) 50%,transparent 50%) top right/' + px + 'px ' + px + 'px no-repeat border-box' }
     function cutBL(px) { return 'linear-gradient(to top right,transparent 50%,var(--hos-cl) 50%,var(--hos-cl) calc(50% + 1.2px),transparent calc(50% + 1.2px)) bottom left/' + px + 'px ' + px + 'px no-repeat border-box' }
+    /* 用户气泡只留线框、底色透出底板：边框比发丝略深一级，斜线才不显得断 */
     var NOT_ROUND = ':not(#dsh-startup-root,#dsh-startup-root *,svg *,[role=progressbar],[class*="pinner"],[class*="avatar"],[class*="Avatar"])'
     var BASE = [
       'html:has(body[data-hos]){background:var(--hos-bg,#dedbd4)}',
@@ -260,6 +261,7 @@ window.__ModuleLoader__.load({
     var CV = B + ' [data-slot="main.conversation"]'
     var TC = CV + ' [data-chat-flow-kind=tool-call]', TV = TC + ' [data-slot="tool.call.toolview"]', ROW = TC + ' [data-expandable=true]'
     var RUN = CV + ' [data-chat-running=true][data-hos-run]'
+    var ACT = CV + ' [data-chat-flow] ' + C('actions')
     var HERO = [
       CV + ' ' + C('composerHero') + ' ' + C('headline') + '{position:relative;flex-direction:column;align-items:center;gap:0;padding:56px 0 40px}',
       CV + ' ' + C('composerHero') + ' ' + C('fishHitbox') + '{display:none}',
@@ -304,6 +306,7 @@ window.__ModuleLoader__.load({
       /* 运行中没有排队消息时它也会显示标题栏，下面挂一个空列表（上下 4px 内边距）和标题栏下边线，看着像和输入卡断开了 */
       B + ' [data-steer-dock] > div > :first-child{border-bottom-color:var(--hos-hair-soft)!important}',
       B + ' [data-steer-dock] > div > ul:empty{display:none}',
+      B + ' [data-steer-dock]{translate:0 var(--hos-steer-dy,0px)}',
       B + ' [data-steer-dock] > div > :first-child:not(:has(~ :not(:empty))){border-bottom-color:transparent!important}',
       /* 输入框座位的淡出渐变：原生在暗色下渐变到写死的中性灰，改成渐变到底板色 */
       CV + ' ' + C('composerSeat') + '{background:none!important;isolation:isolate}',
@@ -334,7 +337,7 @@ window.__ModuleLoader__.load({
       /* 提问卡：原生底色写死（浅色纯白、暗色 #2C2C2E），改成和输入卡同一套玻璃切角卡 */
       CV + ' [data-question-key] ' + C('card') + '{--hos-cl:color-mix(in srgb,var(--hos-ink) 20%,transparent);border:1px solid var(--hos-cl);background:' + cutTR(16) + ',var(--hos-glass)!important;-webkit-backdrop-filter:blur(15px) saturate(1.18);backdrop-filter:blur(15px) saturate(1.18);box-shadow:none!important;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%)}',
       CV + ' [data-question-key] ' + C('badge') + '{background:transparent!important;border:1px solid var(--hos-hair);color:var(--hos-accent-ink)!important;font-family:var(--hos-mono);font-size:10px;letter-spacing:.12em}',
-      CV + ' [data-chat-flow-kind=user] ' + C('bubble') + '{--hos-cl:var(--hos-hair);border:1px solid var(--hos-cl)!important;background:' + cutTR(12) + ',var(--hos-glass)!important;box-shadow:inset 0 1px 0 var(--hos-glass-hi);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}',
+      CV + ' [data-chat-flow-kind=user] ' + C('bubble') + '{--hos-cl:color-mix(in srgb,var(--hos-ink) 24%,transparent);border:1px solid var(--hos-cl)!important;background:' + cutTR(12) + ',transparent!important;box-shadow:none!important;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}',
       CV + ' :is(' + C('timeStart') + ',' + C('timeEnd') + ',' + C('endInfo') + '){font-family:var(--hos-mono);font-size:10px;letter-spacing:.14em}',
       CV + ' [data-turn-process]{font-family:var(--hos-mono);font-size:10.5px;letter-spacing:.14em;color:var(--hos-muted)}',
       /* 思考 / 工具调用行：标题改成等宽小字，像启动页的状态行 */
@@ -343,6 +346,18 @@ window.__ModuleLoader__.load({
       CV + ' [data-state=running] [data-disclosure-row] ' + C('title') + '{color:var(--hos-accent-ink)!important}',
       CV + ' [data-chat-flow-kind=tool-call] [data-disclosure-row]{border-bottom:1px solid var(--hos-hair-soft)}',
       CV + ' [data-chat-flow-kind=tool-call] [data-disclosure-row]:hover{background:var(--hos-hair-soft)}',
+      /* 消息下方的操作栏：按钮并成一排发丝框方格（悬停反白），用量和时间改等宽读数 */
+      ACT + '{gap:0!important;align-items:center}',
+      ACT + ' ' + C('action') + '{box-sizing:border-box;width:26px!important;height:26px!important;margin-right:-1px;border:1px solid var(--hos-hair)!important;background:transparent!important;color:var(--hos-muted)!important}',
+      ACT + ' ' + C('action') + ':hover{position:relative;z-index:1;border-color:var(--hos-ink)!important;background:var(--hos-ink)!important;color:var(--hos-box-ink)!important}',
+      ACT + ' ' + C('action') + ' svg{width:14px;height:14px}',
+      ACT + ' ' + C('endInfo') + '{display:inline-flex;align-items:center;gap:12px;margin-left:14px;font-family:var(--hos-mono);font-size:10px;letter-spacing:.16em;color:var(--hos-muted)}',
+      ACT + ' ' + C('endInfo') + ' *{font-family:inherit!important;font-size:inherit!important;letter-spacing:inherit!important;color:inherit}',
+      ACT + ' ' + C('endInfo') + ' button{padding:0 2px;border:0;background:transparent!important}',
+      ACT + ' ' + C('endInfo') + ' button:hover{color:var(--hos-ink)}',
+      ACT + ' ' + C('endInfo') + ' svg{width:12px;height:12px}',
+      ACT + ' :is(' + C('timeStart') + ',' + C('timeEnd') + '){font-family:var(--hos-mono);font-size:10px;letter-spacing:.16em;color:var(--hos-muted)}',
+      ACT + '[data-clock=start] ' + C('timeStart') + '{margin-right:10px}',
       /* ── 工具调用：照 demo 的工具行（菱形 / 闪烁标记 + 等宽动词 + 目标），结果块去掉原生灰底，改成虚线引出 ── */
       TV + '{--dsw-alias-markdown-code-block:transparent;--dsw-alias-markdown-code-block-banner:transparent;--dsw-alias-bg-base:transparent}',
       ROW + '{gap:10px;padding-top:7px;padding-bottom:7px;border-bottom:1px solid var(--hos-hair-soft);font-family:var(--hos-mono);font-size:11.5px;letter-spacing:.04em}',
@@ -356,6 +371,8 @@ window.__ModuleLoader__.load({
       TC + ' :is([data-state=running] [data-expandable=true],[data-expandable=true][data-state=running]) ' + C('leading') + '::before{width:7px;height:7px;transform:none;border-radius:50%!important;background:var(--hos-accent);animation:hos-blink 1.1s steps(2) infinite}',
       TC + ' :is([data-state=error] [data-expandable=true],[data-expandable=true][data-state=error]) ' + C('leading') + '::before{background:var(--hos-red)}',
       TC + ' :is([data-state=running] [data-expandable=true],[data-expandable=true][data-state=running]) ' + C('title') + '{color:var(--hos-accent-ink)!important}',
+      /* 展开的工具连同结果整块垫一层浅灰，和收起的行分开（同 demo 的 .tool.open） */
+      TV + ' :is(' + C('root') + '[data-open=true],' + C('card') + ':has(> ' + C('bodyWrap') + ')){background:var(--hos-hair-soft)}',
       TV + ' :is([data-body],[data-search],[data-inspect]){margin-left:7px;padding-left:12px;border:0!important;border-left:1px dashed var(--hos-hair)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-family:var(--hos-mono);font-size:11px;color:var(--hos-ink-soft)}',
       TV + ' :is(' + C('inspectButton') + ',' + C('copyButton') + '){border:1px solid var(--hos-hair)!important;border-radius:0!important;background:transparent!important;font-family:var(--hos-mono);font-size:10px;letter-spacing:.16em;color:var(--hos-muted)}',
       TV + ' :is(' + C('inspectButton') + ',' + C('copyButton') + '):hover{border-color:var(--hos-ink)!important;color:var(--hos-ink)}',
@@ -687,6 +704,13 @@ window.__ModuleLoader__.load({
           runs[i].style.setProperty('--hos-run-zh', JSON.stringify(m[1].trim()))
           runs[i].style.setProperty('--hos-run-t', JSON.stringify(pad(+m[2]) + 's'))
         } else runs[i].removeAttribute('data-hos-run')
+      }
+      /* 第三方排队栏和输入卡之间的缝随宿主版本变化（桌面端约 6px，web 端为 0），按实测把它往下补齐 */
+      var sd = q('[data-steer-dock]'), card = q('[data-slot="main.conversation"] [data-composer-card=true]')
+      if (sd && sd.firstElementChild && card) {
+        var dy = parseFloat(sd.style.getPropertyValue('--hos-steer-dy')) || 0
+        var gap = card.getBoundingClientRect().top - (sd.firstElementChild.getBoundingClientRect().bottom - dy)
+        sd.style.setProperty('--hos-steer-dy', (gap > 0 && gap < 24 ? gap.toFixed(2) : 0) + 'px')
       }
       var tps = document.querySelectorAll('[data-slot="main.conversation"] button[data-turn-process]')
       for (var j = 0; j < tps.length; j++) {
