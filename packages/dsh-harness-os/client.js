@@ -174,10 +174,12 @@ window.__ModuleLoader__.load({
       'html[data-platform=darwin] body:has([data-slot=root] > [data-sidebar-collapsed=true]) #hos-chrome .hos-line{clip-path:polygon(var(--hos-cut,130px) 0,100% 0,100% 100%,0 100%,0 20px,var(--hos-cut,130px) 20px)}',
       /* 有机框时顶栏已经在左上角控件下方，DSH 给顶栏加的让位缩进不需要 */
       B + '[data-hos-chassis] [data-slot="main.conversation"]{--dsh-frame-leading-clearance:0px}',
-      /* 顶部拖动带：机框内缩出来的 26px 原本不是拖动区，把它补成窗口拖动区 */
-      '#hos-chrome .hos-drag{position:absolute;left:0;right:0;top:0;height:var(--hos-inset);pointer-events:auto;-webkit-app-region:drag;app-region:drag}',
-      /* macOS：左上角是红绿灯和收起侧栏后的两个按钮，拖动区从它们右侧开始，否则按钮点不动 */
-      'html[data-platform=darwin] #hos-chrome .hos-drag{left:240px}',
+      /* 顶部拖动带：机框内缩出来的 26px 原本不是拖动区，把它补成窗口拖动区。
+         不接鼠标事件：拖动由 Electron 按区域计算，和 pointer-events 无关；这样收起侧栏后落在这一带的两个按钮
+         （DOM 里排在后面、带 no-drag）照常能点，拖动带也就不用再从 240px 才开始 */
+      '#hos-chrome .hos-drag{position:absolute;left:0;right:0;top:0;height:var(--hos-inset);pointer-events:none;-webkit-app-region:drag;app-region:drag}',
+      /* macOS：从红绿灯右侧开始 */
+      'html[data-platform=darwin] #hos-chrome .hos-drag{left:80px}',
       'body:not([data-hos-chassis]) #hos-chrome .hos-drag{display:none}',
       '#hos-chrome .hos-c{position:absolute;width:26px;height:26px}',
       '#hos-chrome .hos-c::before,#hos-chrome .hos-c::after{content:"";position:absolute;background:var(--hos-ink);opacity:.62}',
@@ -643,7 +645,9 @@ window.__ModuleLoader__.load({
         '<div class="hos-brand"><div class="b1">DEEPSEEK</div><div class="b2">SYNTHESIZE INTELLIGENCE</div><div class="b3"><b>HARNESS</b><span>OS</span></div></div>' +
         '<div class="hos-boot"><div class="hos-meta"><span class="rev"></span><span class="clk">--:--:--</span></div><div class="hos-slats"><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div></div>' +
         '<div class="hos-foot"><span>POWERED BY DEEPSEEK</span><i></i></div>'
-      document.body.appendChild(chrome)
+      /* 放在 body 最前面：mac 上 DSH 把 body 下非 #root 的节点都设成 no-drag，铺满整窗的覆盖层会扣掉顶栏原生的拖动区。
+         Electron 按 DOM 顺序叠加拖动 / 不可拖动区域，排在 #root 前面，#root 里的拖动区就会重新生效（显示层级靠 z-index，不受影响） */
+      if (document.body.firstChild) document.body.insertBefore(chrome, document.body.firstChild); else document.body.appendChild(chrome)
       chrome.querySelector('.rev').textContent = revText()
     }
     function facts() { var c = window.__DSH_STARTUP__; return (c && c.facts && typeof c.facts === 'object') ? c.facts : {} }
