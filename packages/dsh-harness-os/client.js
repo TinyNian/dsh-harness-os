@@ -202,6 +202,8 @@ window.__ModuleLoader__.load({
       'body:has([data-slot=root] > [data-sidebar-collapsed=true]) #hos-chrome .hos-brand{opacity:0;transition:transform 720ms ' + EASE + ',opacity 0s linear ' + FOLD_MS + 'ms}',
       'body[data-hos-phase=docked]:not(:has([data-slot=root] > [data-sidebar-collapsed=true])) #hos-chrome .hos-brand{transition:transform 720ms ' + EASE + ',opacity 0s}',
       'body:not([data-hos-chassis]) #hos-chrome .hos-brand{left:20px;top:18px}',
+      /* 不显示机框时 mac 红绿灯就在左上角，品牌块下移到红绿灯下方（和有机框时同一高度） */
+      'html[data-platform=darwin] body:not([data-hos-chassis]) #hos-chrome .hos-brand{top:44px}',
       /* 开机读数：只在揭幕时接住启动页，随后退场 */
       '#hos-chrome .hos-meta{position:absolute;left:46px;top:170px;display:flex;gap:10px;white-space:nowrap;font-family:var(--hos-mono);font-size:10px;letter-spacing:.16em;color:var(--hos-muted)}',
       '#hos-chrome .hos-meta .clk{color:var(--hos-accent);font-variant-numeric:tabular-nums}',
@@ -761,12 +763,15 @@ window.__ModuleLoader__.load({
       var off = !r || r.width < 160 || r.height < 100 || getComputedStyle(col).visibility === 'hidden'
       chrome.classList.toggle('side-off', off)
       var bs = document.body.style
-      /* logo 收成后中心在视口 y=67（顶 44 + 高 46 的一半）：收起按钮（28px）中心对上它，新会话在 logo 下方 18px */
+      /* 收起按钮（28px）中心对上 logo 中线，新会话在 logo 下方 18px。按品牌块实际位置量（机框开关、平台不同位置不同），
+         量不到时用有机框时的值：顶 44、高 46，中线 y=67 */
       var row = q('[data-slot=sidebar] ' + C('logoRow'))
       if (row && !off) {
         var top = row.getBoundingClientRect().top
-        bs.setProperty('--hos-logo-pad', Math.max(0, Math.round(67 - 14 - top)) + 'px')
-        bs.setProperty('--hos-logo-h', Math.max(40, Math.round(44 + 46 + 18 - top)) + 'px')
+        var be = chrome.querySelector('.hos-brand'), br = phase === 'docked' && be && be.getBoundingClientRect()
+        var mid = br && br.height ? br.top + br.height / 2 : 67, bot = br && br.height ? br.bottom : 90
+        bs.setProperty('--hos-logo-pad', Math.max(0, Math.round(mid - 14 - top)) + 'px')
+        bs.setProperty('--hos-logo-h', Math.max(40, Math.round(bot + 18 - top)) + 'px')
       }
       /* 折叠后左上角是「展开侧栏 / 新会话」两个按钮：机框顶线从它们右边 10px 开始 */
       var lead = document.querySelectorAll('[data-slot="shell.leading"] button')
