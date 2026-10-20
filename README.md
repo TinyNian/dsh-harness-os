@@ -54,7 +54,7 @@ dsh plugin --profile desktop add "github:TinyNian/dsh-harness-os#path:packages/d
 
 **Web**：把 `--profile desktop` 换成 `--profile web`，装完重启 `dsh web`。
 
-**锁定版本**：上面两条装的是 `main` 上的最新代码。想停在某个发布版本，就在 `#` 后面加上标签，例如 `"github:TinyNian/dsh-harness-os#v0.2.0&path:packages/dsh-harness-os"`。
+**锁定版本**：上面两条装的是 `main` 上的最新代码。想停在某个发布版本，就在 `#` 后面加上标签，例如 `"github:TinyNian/dsh-harness-os#v0.2.1&path:packages/dsh-harness-os"`。
 各版本的更新内容和安装包见 [Releases](https://github.com/TinyNian/dsh-harness-os/releases)，完整记录在 [CHANGELOG.md](CHANGELOG.md)。
 
 > macOS 桌面端自带的命令行在 `/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh`，版本和桌面端一致。
