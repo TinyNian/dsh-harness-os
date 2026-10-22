@@ -500,6 +500,76 @@
 
   function q(sel) { return root.querySelector(sel) }
   ui.plate = q('.dsu-plate')
+
+  /* ── 桌面端标题栏覆盖层（窗口按钮）──────────────────────────────────────
+     三个按钮由 Electron 画在网页之上，DOM 遮罩盖不住，能改的只有它读的两个
+     主题变量：--dsw-specific-sidebar-fill（条带）/ --dsw-alias-label-primary（图标）。
+     条带：全透明，画面透上来，零色差。
+     图标：按"黑幕 → 过曝洗白 → 暖白底板"三层按各自 opacity 合成出**右上角**的
+     近似色，作为图标颜色 —— 画面越亮图标越亮，于是它始终融在画面里。 */
+  var captionTimer = null
+  var CAPTION_STRIP = '#00000000'
+  function captionMix(a, b, t) {
+    var parse = function (hex) {
+      var h = String(hex || '').trim().replace('#', '')
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]
+      if (h.length === 8) h = h.slice(0, 6)
+      if (!/^[0-9a-fA-F]{6}$/.test(h)) return null
+      return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+    }
+    var ca = parse(a); var cb = parse(b)
+    if (!ca || !cb) return b
+    var k = Math.max(0, Math.min(1, t))
+    var out = '#'
+    for (var i = 0; i < 3; i++) {
+      var v = Math.round(ca[i] + (cb[i] - ca[i]) * k)
+      out += (v < 16 ? '0' : '') + v.toString(16)
+    }
+    return out
+  }
+  function captionOpacity(node) {
+    if (!node) return 0
+    var v = parseFloat(window.getComputedStyle(node).opacity)
+    return isFinite(v) ? v : 0
+  }
+  function captionInk() {
+    /* 右上角那一块的近似色。底板自带一块偏右上(78%/12%)的白色高光，
+       洗白层是径向渐变（浅色主题边缘约 #b9b4ab，深色主题近黑），所以
+       这里按主题取一个"角落色"，而不是用中心的白。 */
+    var dark = root.classList.contains('dsu-dark')
+    var plateBg = window.getComputedStyle(root).getPropertyValue('--dsu-bg').trim() || (dark ? '#0b0b0c' : '#e5e3df')
+    var cornerHighlight = dark ? '#3a3a3d' : '#f2f0eb'
+    var washCorner = dark ? '#6a665f' : '#c9c4ba'
+    var plateOp = captionOpacity(ui.plate)
+    var washOp = captionOpacity(ui.wash)
+    var base = captionMix('#000000', plateBg, plateOp)
+    base = captionMix(base, cornerHighlight, plateOp * 0.55)
+    return captionMix(base, washCorner, washOp)
+  }
+  function captionPaint() {
+    try {
+      if (!document.body || !document.body.style) return
+      document.body.style.setProperty('--dsw-specific-sidebar-fill', CAPTION_STRIP)
+      document.body.style.setProperty('--dsw-alias-label-primary', captionInk())
+    } catch (err) { /* 读不到就保持原样，不影响动画 */ }
+  }
+  function captionStart() {
+    captionPaint()
+    if (captionTimer) clearInterval(captionTimer)
+    /* 过渡集中在开头几秒；之后画面静止，采样自然收敛 */
+    captionTimer = setInterval(captionPaint, 120)
+    setTimeout(function () {
+      if (captionTimer) { clearInterval(captionTimer); captionTimer = null }
+      captionPaint()
+    }, 12000)
+  }
+  function captionStop() {
+    if (captionTimer) { clearInterval(captionTimer); captionTimer = null }
+    try {
+      document.body.style.removeProperty('--dsw-specific-sidebar-fill')
+      document.body.style.removeProperty('--dsw-alias-label-primary')
+    } catch (err) { /* noop */ }
+  }
   ui.watermark = q('.dsu-watermark')
   ui.black = q('.dsu-black')
   ui.blackInner = q('.dsu-black-inner')
@@ -2102,6 +2172,8 @@
     document.documentElement.classList.remove('dsu-lock')
     document.documentElement.style.overflow = ''
     if (document.body) document.body.style.overflow = ''
+    /* 揭幕：把标题栏覆盖层的配色还给应用 */
+    captionStop()
     root.classList.remove('dsu-boot')
     root.classList.add('dsu-gone')
     setTimeout(function () {
@@ -2143,6 +2215,11 @@
   document.documentElement.classList.add('dsu-lock')
   document.documentElement.style.overflow = 'hidden'
   if (document.body) document.body.style.overflow = 'hidden'
+  /* 桌面端：Electron 的标题栏覆盖层（最小化/最大化/关闭）画在网页之上，DOM 盖不住。
+     条带设成全透明 —— 让动画画面自己透上来，任何阶段都不会出现异色矩形；
+     图标颜色跟随画面合成色 —— 黑幕阶段隐形，亮部阶段融进高光。
+     非桌面端没有这两个变量，写入无副作用。 */
+  captionStart()
   setProgress(0.05)
   root.classList.remove('dsu-boot')
 
