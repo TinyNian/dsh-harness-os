@@ -678,6 +678,10 @@ window.__ModuleLoader__.load({
         if (r && r.parentNode) r.parentNode.removeChild(r)
         if (document.documentElement.classList) document.documentElement.classList.remove('dsu-lock')
         if (document.body && document.body.style) document.body.style.overflow = ''
+        try {
+          document.body.style.removeProperty('--dsw-specific-sidebar-fill')
+          document.body.style.removeProperty('--dsw-alias-label-primary')
+        } catch (e) { /* noop */ }
         window.__DSH_STARTUP_FAILED__ = true
       } catch (e) { /* 兜底不再抛 */ }
     }
@@ -692,6 +696,11 @@ window.__ModuleLoader__.load({
       root.className = 'dsu-root dsu-boot'
       if (document.documentElement.classList) document.documentElement.classList.add('dsu-lock')
       if (document.body && document.body.style) document.body.style.overflow = 'hidden'
+      /* 桌面端：自举第一帧先让条带透明、图标压进黑幕；随后由 splash.js 接管跟随 */
+      try {
+        document.body.style.setProperty('--dsw-specific-sidebar-fill', '#00000000')
+        document.body.style.setProperty('--dsw-alias-label-primary', '#000000')
+      } catch (e) { /* noop */ }
 
       /* 样式与运行时都从 Host 路由取 —— 同一份文件，不额外维护内联副本 */
       var failed = false
