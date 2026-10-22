@@ -3,7 +3,12 @@
 DeepSeek Harness 主界面皮肤「Harness OS」。沿用 [dsh-startup-screen](../dsh-startup-screen) 开机动画的技术档案版式，
 开机动画揭幕时原地接住常驻件，其余部件按同一节奏装配。纯客户端插件，不改 DSH 源码、不注册工具或服务。
 
-安装、截图和兼容性说明见[仓库首页](../../README.md)。
+<p align="center">
+  <img src="screenshots/light-2-running.webp" width="49%" alt="浅色：任务进行中">
+  <img src="screenshots/dark-2-running.webp" width="49%" alt="暗色：任务进行中">
+</p>
+
+安装、更多截图和兼容性说明见[仓库首页](../../README.md)。截图是虚构项目的演示数据；插件市场展示的 8 张列在 `screenshots.json`。
 
 ## 工作方式
 

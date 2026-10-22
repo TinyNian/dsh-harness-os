@@ -3,8 +3,8 @@
 <p align="center">DeepSeek Harness 的主界面皮肤：把开机动画的「技术档案」版式延伸到整个工作台。</p>
 
 <p align="center">
-  <img src="docs/screenshots/real-hero-light.webp" width="49%" alt="Harness OS 浅色空会话页">
-  <img src="docs/screenshots/real-hero-dark.webp" width="49%" alt="Harness OS 暗色空会话页">
+  <img src="packages/dsh-harness-os/screenshots/light-1-home.webp" width="49%" alt="Harness OS 浅色空会话页">
+  <img src="packages/dsh-harness-os/screenshots/dark-1-home.webp" width="49%" alt="Harness OS 暗色空会话页">
 </p>
 
 这个仓库有两个 DSH 插件，配合使用：
@@ -22,13 +22,27 @@
 所以镜头后撤、开机动画淡出时，这些部件原地不动；其余部件在揭幕那一刻按开机动画的节奏装配进来，准星从开机尺寸收进空会话页。
 约 1.5 秒后，开机读数退场，品牌块缩成 logo。
 
-<p align="center"><img src="docs/screenshots/handoff-strip.webp" alt="揭幕衔接：开机动画终幕 → 揭幕装配 → 收起开机读数"></p>
+<p align="center"><img src="packages/dsh-harness-os/screenshots/handoff-strip.webp" alt="揭幕衔接：开机动画终幕 → 揭幕装配 → 收起开机读数"></p>
 
 ## 界面
 
+截图来自隔离环境里的虚构项目 `tidewatch`（潮汐预报小站），会话和代码都是演示数据，模型回复由本地脚本回放。
+
 <p align="center">
-  <img src="docs/screenshots/real-dock-dark.webp" width="49%" alt="右侧栏引导页：罗盘换成开机动画的准星">
-  <img src="docs/screenshots/real-settings.webp" width="49%" alt="设置页里的 Harness OS 一节">
+  <img src="packages/dsh-harness-os/screenshots/light-2-running.webp" width="49%" alt="浅色：任务进行中，工具行与任务进度">
+  <img src="packages/dsh-harness-os/screenshots/dark-2-running.webp" width="49%" alt="暗色：任务进行中，工具行与任务进度">
+</p>
+<p align="center">
+  <img src="packages/dsh-harness-os/screenshots/light-5-done.webp" width="49%" alt="浅色：一轮结束，回答与改动文件卡片">
+  <img src="packages/dsh-harness-os/screenshots/dark-5-done.webp" width="49%" alt="暗色：一轮结束，回答与改动文件卡片">
+</p>
+<p align="center">
+  <img src="packages/dsh-harness-os/screenshots/light-3-diff.webp" width="49%" alt="浅色：右侧栏打开改动对比">
+  <img src="packages/dsh-harness-os/screenshots/dark-3-diff.webp" width="49%" alt="暗色：右侧栏打开改动对比">
+</p>
+<p align="center">
+  <img src="packages/dsh-harness-os/screenshots/light-4-settings.webp" width="49%" alt="浅色：设置页里的 Harness OS 一节">
+  <img src="packages/dsh-harness-os/screenshots/dark-4-settings.webp" width="49%" alt="暗色：设置页里的 Harness OS 一节">
 </p>
 
 - **主题变量**：覆盖 DSH 的 `--dsw-alias-*` 别名 token（底色、描边、文字、按钮、菜单、提示、代码对比……），浅色是开机动画的暖白底板，暗色是同一套的暗底板，跟随 DSH 的「外观」设置。
@@ -39,7 +53,7 @@
 
 对话流的样子可以看 demo（下图是 demo 截图，不是真实会话）：
 
-<p align="center"><img src="docs/screenshots/demo-chat-light.webp" alt="demo：对话流、改动文件卡片与右侧栏对比页"></p>
+<p align="center"><img src="packages/dsh-harness-os/screenshots/demo-chat-light.webp" alt="demo：对话流、改动文件卡片与右侧栏对比页"></p>
 
 ## 安装
 
@@ -86,9 +100,9 @@ dsh plugin --profile desktop remove dsh-startup-screen
 ```text
 ├─ packages/
 │  ├─ dsh-harness-os/       主界面皮肤（client.js 手写 ModuleLoader bundle，无需构建）
+│  │  └─ screenshots/       截图；screenshots.json 列出插件市场展示的 8 张
 │  └─ dsh-startup-screen/   开机动画（fork，FORK.md 记录来源和改动）
 ├─ demo/                    可交互的 HTML demo：开机动画 → 主界面 → 对话 / 右侧栏 / 设置页
-├─ docs/screenshots/
 └─ CHANGELOG.md             各版本更新记录
 ```
 
