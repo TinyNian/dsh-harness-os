@@ -303,6 +303,8 @@ window.__ModuleLoader__.load({
       CV + ' [data-composer-dock=true]{font-family:var(--hos-mono);font-size:10px;letter-spacing:.12em;color:var(--hos-muted)}',
       CV + ' [data-composer-dock=true] *{font-family:inherit!important;font-size:inherit!important;letter-spacing:inherit}',
       /* 待办 / 目标 / 队列：贴在输入框上方的切角卡 */
+      /* DSH 0.2.1-rc.3 起输入框和上方各卡片放进同一个纵向 flex（composerStack，间距 6px），切角卡贴不住输入卡；对话态里收成 0 */
+      CV + ' [data-content-phase=active] ' + C('composerStack') + '{--dsh-composer-stack-gap:0px}',
       CV + ' [data-slot="conversation.input.dock"] :is([data-testid=todo-panel],[data-goal-bar],[data-queue-dock]){--hos-cl:var(--hos-hair);border:1px solid var(--hos-cl)!important;border-bottom:0!important;background:' + cutTR(10) + ',linear-gradient(180deg,var(--hos-glass-hi),transparent 70%),var(--hos-glass)!important;box-shadow:none!important;-webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}',
       /* 第三方 dsh-input-traffic 用自己的排队栏（[data-steer-dock]）替换官方那条：原生是 bg-layer-1 米色底 + 四边圆角框，
          同样做成贴在输入卡上方的玻璃切角卡（只认属性和结构，不认它带哈希的类名） */
@@ -416,6 +418,8 @@ window.__ModuleLoader__.load({
     var TRAJ = [
       /* 轨迹页根节点和分栏用 bg-layer-1 铺满，盖住底板成一整块实色 */
       CV + ' ' + C('split') + ',' + CV + ' :has(> ' + C('split') + '){background:transparent!important}',
+      /* 0.2.1-rc.3 起轨迹页外面多包了一层 [data-conversation-composer-overlay]，同样用 bg-layer-1 铺满 */
+      CV + ' [data-conversation-composer-overlay]{background:transparent!important}',
       CV + ' ' + C('tablePane') + ',' + CV + ' ' + C('table') + '{background:transparent!important;--trajectory-turn-accent:var(--hos-hair)}',
       CV + ' ' + C('table') + ' th{background:color-mix(in srgb,var(--hos-bg-2) 92%,transparent)!important;font-family:var(--hos-mono)!important;font-size:9.5px!important;letter-spacing:.22em;font-weight:400!important;color:var(--hos-muted)!important;border-bottom:1px solid var(--hos-hair)!important}',
       CV + ' ' + C('table') + ' td{border-bottom:1px solid var(--hos-hair-soft)!important}',
