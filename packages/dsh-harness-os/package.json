@@ -1,6 +1,6 @@
 {
   "name": "dsh-harness-os",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "DeepSeek Harness 主界面皮肤「Harness OS」：沿用 dsh-startup-screen 开机动画的技术档案版式——暖白 / 暗色底板、发丝机框、等宽读数、准星罗盘。开机动画揭幕时原地接住常驻件，其余部件按同一节奏装配。纯客户端插件，不改 DSH 源码。",
   "type": "module",
   "main": "index.js",

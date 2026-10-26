@@ -9,7 +9,7 @@
 | fork 基线 | `8499f9df21c6cb27bef8ed7bb1ba29da654fc795`（v1.6.0，2026-10-17） |
 | 原始作者 | 沈宏宏（dsh-startup-screen 1.1.0，MIT） |
 | 上游维护 | dsh-startup-screen contributors |
-| 本 fork 版本 | `1.6.0-hos.2` |
+| 本 fork 版本 | `1.6.0-hos.3` |
 | 许可 | MIT，原版权声明原样保留，见 [LICENSE](LICENSE) |
 
 上游 `package/` 目录原样搬进这里；上游根目录的 `CHANGELOG.md`、`THIRD-PARTY-NOTICES.md`
@@ -21,9 +21,10 @@
 |---|---|---|
 | `lib/splash.js` | 揭幕（`dsu-handoff`）那一刻派发 `window` 事件 `dsh-startup:handoff` | 上游只在完全淡出后派发 `dsh-startup:done`，晚了约 900ms；主界面要在镜头后撤的同一刻开始装配 |
 | `package.json` | 版本号、仓库地址、contributors | 标明 fork 来源 |
-| `lib/client.js` | 兜底版本常量 `FALLBACK_VERSION` 跟随本 fork 版本（当前 `1.6.0-hos.2`） | 与 package.json 保持一致（上游有测试防两处漂移） |
+| `lib/client.js` | 兜底版本常量 `FALLBACK_VERSION` 跟随本 fork 版本（当前 `1.6.0-hos.3`） | 与 package.json 保持一致（上游有测试防两处漂移） |
 | `lib/splash.js` | 档案面板去掉左侧那块竖条，改成六块错落叠放（位置、宽高、景深各不相同） | 左侧竖条压在品牌块和读数后面，读起来像一块孤立的代码框；整齐的竖条没有层次 |
 | `lib/splash.css`（末尾追加） | 档案面板改成半透明玻璃，每块走自己的多段非线性路径横移（7–13 秒、停顿与冲刺交替、方向有正有反）；SELF-CHECK 去掉外框、底色、投影；macOS 红绿灯区域机框留缺口 | 实心面板没有含义、悬浮框出戏；红绿灯压在机框左上角。只追加覆盖、不改上游已有规则，上游的样式断言照常通过 |
+| `lib/splash.js`、`lib/client.js` | Windows 桌面端播放期间，窗口按钮（Electron 标题栏覆盖层）跟随画面：条带透明，图标色按黑幕、洗白、底板三层合成，揭幕时还原；自举失败时把配色还给应用（[WsTwistzz](https://github.com/WsTwistzz) 贡献，[#1](https://github.com/TinyNian/dsh-harness-os/pull/1)） | 按钮由 Electron 画在网页之上，DOM 遮罩盖不住，只能改它读取的两个主题变量 |
 | `FORK.md` | 新增 | 本文件 |
 
 其余文件与上游一致。上游的 352 项冒烟测试在本 fork 上全部通过（`npm test`）。
